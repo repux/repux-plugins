@@ -1,0 +1,5 @@
+/.idea
+/var/cache/*
+/var/log/*
+/vendor
+/docker/logs/*
