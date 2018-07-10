@@ -1,0 +1,20 @@
+security:
+    providers:
+        user_provider_by_auth_token:
+            entity:
+                class: App\Entity\User
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        main:
+            pattern: ^/auth/
+            provider: user_provider_by_auth_token
+            anonymous: ~
+            guard:
+                authenticators:
+                    - App\Security\AuthTokenAuthenticator
+
+    access_control:
+        - { path: ^/auth/secure, roles: ROLE_USER }

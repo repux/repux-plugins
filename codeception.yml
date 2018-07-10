@@ -1,0 +1,26 @@
+paths:
+    tests: tests
+    output: tests/_output
+    data: tests/_data
+    support: tests/_support
+    envs: tests/_envs
+
+actor_suffix: Tester
+
+extensions:
+    enabled:
+        - Codeception\Extension\RunFailed
+params:
+    - .env
+    - .env.testing
+
+modules:
+    config:
+        Db:
+            populate: true
+            cleanup: true
+        Symfony:
+            app_path: src
+            environment: test
+        REST:
+            depends: Symfony
