@@ -20,6 +20,9 @@ fn_exists() {
 }
 
 up() {
+    if [ ! -f .env ]; then
+        cp .env.dist .env
+    fi
     docker-compose up --build -d ${@}
     composer install
     printf "Creating databse..."
