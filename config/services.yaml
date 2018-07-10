@@ -2,6 +2,26 @@
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
     locale: 'en'
+    frontend.url: '%env(FRONTEND_URL)%'
+    ipfs.host: '%env(IPFS_HOST)%'
+    ipfs.port: '%env(IPFS_PORT)%'
+    rabbitmq_shopify_store_process:
+        use_queuing: true
+        routing_key: ''
+    rabbitmq_shopify_store_process.exchange_options:
+        name: shopify_store_process
+        type: topic
+        durable: true
+    rabbitmq_shopify_store_process.queue_options:
+        name: shopify_store_process
+        durable: false
+    shopify.oauth:
+        api_key: '%env(SHOPIFY_API_KEY)%'
+        shared_secret: '%env(SHOPIFY_SECRET_KEY)%'
+        redirect_route_success: '%frontend.url%/dashboard/integrations?shopify=success'
+        redirect_route_fail: '%frontend.url%/dashboard/integrations?shopify=failed'
+        scope: read_orders
+    file_storage.local.dir: '%env(resolve:FILE_STORAGE_LOCAL_DIR)%'
 
 services:
     # default configuration for services in *this* file
@@ -16,7 +36,7 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/*'
-        exclude: '../src/{Entity,Migrations,Tests,Kernel.php}'
+        exclude: '../src/{Entity,Migrations,Tests,Kernel.php,DataFixtures}'
 
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
@@ -28,3 +48,37 @@ services:
     # please note that last definitions always *replace* previous ones
 
     Doctrine\ORM\EntityManager: '@doctrine.orm.default_entity_manager'
+
+    App\FileStorage\LocalFileStorage:
+        arguments:
+            $storageDir: '%file_storage.local.dir%'
+
+    # ========== BEGIN SHOPIFY
+
+    App\Service\ShopifyStoreProcessImportOrdersService:
+        public: true
+        arguments:
+            $logger: '@logger'
+
+    App\Handler\ShopifyStoreProcessHandler:
+        arguments:
+            $producer: '@old_sound_rabbit_mq.shopify_store_process_producer'
+
+    guzzle.client.shopify_api:
+        class: GuzzleHttp\Client
+
+    App\Shopify\Authentication\OAuth:
+        public: true
+        arguments:
+            $config: '%shopify.oauth%'
+            $client: '@guzzle.client.shopify_api'
+
+
+    App\Shopify\Security\HmacSignature:
+        arguments:
+            $sharedSecret: '%env(SHOPIFY_SECRET_KEY)%'
+
+    App\Shopify\Consumer\ShopifyStoreProcessConsumer:
+        public: true
+
+    # ========== END SHOPIFY

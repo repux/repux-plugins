@@ -3,6 +3,7 @@
 namespace App\Entity\Traits;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 trait IdentityTrait
 {
@@ -11,6 +12,8 @@ trait IdentityTrait
      * @ORM\Id
      * @ORM\Column(type="integer", nullable=false)
      * @ORM\GeneratedValue(strategy="IDENTITY")
+     *
+     * @Serializer\Expose
      */
     private $id;
 

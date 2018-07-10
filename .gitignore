@@ -1,5 +1,9 @@
+!.gitkeep
 /.idea
 /var/cache/*
 /var/log/*
 /vendor
 /docker/logs/*
+/.env*
+!/.env.dist
+/.docker-data

@@ -4,7 +4,7 @@ namespace Tests\Unit;
 
 use App\Entity\User;
 use App\Entity\UserAuthToken;
-use App\Services\UserAuthTokenService;
+use App\Service\UserAuthTokenService;
 use Traits\StubDateTimeFactoryServiceTrait;
 use Traits\StubEntityManagerTrait;
 use Codeception\Stub;

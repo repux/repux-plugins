@@ -2,7 +2,7 @@
 
 namespace Traits;
 
-use App\Services\DateTimeFactoryService;
+use App\Service\DateTimeFactoryService;
 use Codeception\Util\Stub;
 
 trait StubDateTimeFactoryServiceTrait

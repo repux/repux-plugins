@@ -5,17 +5,26 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Exception\SignInException;
 use App\Security\AuthKeyToken;
-use App\Services\InputValidationService;
-use App\Services\AuthService;
-use App\Services\UserService;
+use App\Service\InputValidationService;
+use App\Service\AuthService;
+use App\Service\UserService;
 use App\Validator\Constraints\EthereumAddress;
+use FOS\RestBundle\Controller\Annotations as Rest;
+use Nelmio\ApiDocBundle\Annotation\Security;
+use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
+/**
+ * @Route("/api/auth")
+ *
+ * @SWG\Tag(name="Authentication")
+ * @Security(name="")
+ */
 class AuthController extends Controller
 {
     private $inputValidationService;
@@ -39,7 +48,34 @@ class AuthController extends Controller
     }
 
     /**
-     * @Route("/auth/generate-message", name="auth_generate_message", methods={"POST"})
+     * Regenerate auth message for given wallet address
+     *
+     * @SWG\Parameter(
+     *     in="body",
+     *     name="data",
+     *     @SWG\Schema(
+     *         type="object",
+     *         @SWG\Property(property="address", type="string")
+     *     )
+     * )
+     * @SWG\Response(
+     *     response=Response::HTTP_OK,
+     *     description="Returns generated message",
+     *     @SWG\Schema(
+     *         type="object",
+     *         @SWG\Property(property="message", type="string"),
+     *     )
+     * )
+     * @SWG\Response(
+     *     response=Response::HTTP_BAD_REQUEST,
+     *     description="Invalid input data",
+     *     @SWG\Schema(
+     *         type="object",
+     *         @SWG\Property(property="errors")
+     *     )
+     * )
+     *
+     * @Rest\Post("/generate-message", name="auth_generate_message")
      */
     public function generateMessage(Request $request)
     {
@@ -61,7 +97,35 @@ class AuthController extends Controller
     }
 
     /**
-     * @Route("/auth/sign-in", name="auth_sign_in", methods={"POST"})
+     * Sign in by sending a signed auth message
+     *
+     * @SWG\Parameter(
+     *     in="body",
+     *     name="data",
+     *     @SWG\Schema(
+     *         type="object",
+     *         @SWG\Property(property="address", type="string"),
+     *         @SWG\Property(property="signed_message", type="string")
+     *     )
+     * )
+     * @SWG\Response(
+     *     response=Response::HTTP_OK,
+     *     description="Returns auth token",
+     *     @SWG\Schema(
+     *         type="object",
+     *         @SWG\Property(property="token", type="string"),
+     *     )
+     * )
+     * @SWG\Response(
+     *     response=Response::HTTP_BAD_REQUEST,
+     *     description="Invalid input data",
+     *     @SWG\Schema(
+     *         type="object",
+     *         @SWG\Property(property="errors")
+     *     )
+     * )
+     *
+     * @Rest\Post("/sign-in", name="auth_sign_in")
      */
     public function signIn(Request $request)
     {
@@ -89,7 +153,14 @@ class AuthController extends Controller
     }
 
     /**
-     * @Route("/auth/sign-out", name="auth_sign_out", methods={"GET"})
+     * Invalidate current auth token
+     *
+     * @SWG\Response(
+     *     response=Response::HTTP_OK,
+     *     description="Returns nothing"
+     * )
+     *
+     * @Rest\Get("/sign-out", name="auth_sign_out")
      */
     public function signOut()
     {

@@ -6,4 +6,5 @@ modules:
         - Doctrine2:
             depends: Symfony
         - \Helper\Functional
+        - \Helper\Auth
         - Asserts

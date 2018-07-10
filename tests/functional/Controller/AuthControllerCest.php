@@ -6,13 +6,12 @@ use App\Entity\User;
 use App\Entity\UserAuthToken;
 use App\Security\AuthTokenAuthenticator;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class AuthControllerCest
 {
-    const AUTH_GENERATE_MESSAGE_PATH = '/auth/generate-message';
-    const AUTH_SIGN_IN_PATH = '/auth/sign-in';
-    const AUTH_SIGN_OUT_PATH = '/auth/sign-out';
+    const AUTH_GENERATE_MESSAGE_PATH = '/api/auth/generate-message';
+    const AUTH_SIGN_IN_PATH = '/api/auth/sign-in';
+    const AUTH_SIGN_OUT_PATH = '/api/auth/sign-out';
 
     const ADDRESS = '0x107a1dc2a74adb3c0fdddb20614b1bdabf35a8a8';
     const MESSAGE = '99896b43b25ff9691d0d3cfa7dc79ae0e2a8a12a3deeb741093c342602d339d2';
@@ -40,9 +39,8 @@ class AuthControllerCest
 
     public function generateMessageWithEmptyAddress(\FunctionalTester $I)
     {
-        $I->expectException(NotFoundHttpException::class, function () use ($I) {
-            $I->sendPOST(sprintf('%s/%s', self::AUTH_GENERATE_MESSAGE_PATH, ''));
-        });
+        $I->sendPOST(self::AUTH_GENERATE_MESSAGE_PATH);
+        $I->seeResponseCodeIs(Response::HTTP_BAD_REQUEST);
     }
 
     public function signIn(\FunctionalTester $I)

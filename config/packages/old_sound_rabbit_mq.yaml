@@ -1,0 +1,16 @@
+old_sound_rabbit_mq:
+    connections:
+        default:
+            host: '%env(RABBITMQ_HOST)%'
+            port: '%env(RABBITMQ_PORT)%'
+    producers:
+        shopify_store_process:
+            connection: default
+            exchange_options: '%rabbitmq_shopify_store_process.exchange_options%'
+            queue_options: '%rabbitmq_shopify_store_process.queue_options%'
+    consumers:
+        shopify_store_process:
+            connection: default
+            exchange_options: '%rabbitmq_shopify_store_process.exchange_options%'
+            queue_options: '%rabbitmq_shopify_store_process.queue_options%'
+            callback: App\Shopify\Consumer\ShopifyStoreProcessConsumer

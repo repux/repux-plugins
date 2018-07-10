@@ -4,7 +4,7 @@ namespace Tests\Unit;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
-use App\Services\UserService;
+use App\Service\UserService;
 use Traits\StubEntityManagerTrait;
 use Codeception\Stub;
 use Codeception\TestCase\Test;

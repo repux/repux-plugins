@@ -1,0 +1,93 @@
+#!/bin/bash
+
+COMMAND=$1
+shift
+ARGUMENTS="${@}"
+
+usage() {
+    echo "$0 [COMMAND] [ARGUMENTS]"
+    echo "  Commands:"
+    echo "    - up: setup the environment"
+    echo "    - composer: run composer"
+    echo "    - console: run symfony console"
+    echo "    - codecept: run codeception"
+    echo "    - tests-build: prepare environment for tests"
+    echo "    - tests-run [--build]: run the tests"
+}
+
+fn_exists() {
+    type $1 2>/dev/null | grep -q 'is a function'
+}
+
+up() {
+    if [ ! -f .env ]; then
+        cp .env.dist .env
+    fi
+    docker-compose up --build -d ${@}
+    composer install
+    printf "Creating databse..."
+    console doctrine:database:create -q -n
+    printf "Runing migrations..."
+    console doctrine:migrations:migrate -q -n
+    printf "Loading fixtures..."
+    console doctrine:fixtures:load -q -n --append
+}
+
+composer() {
+    docker-compose run --no-deps --rm php composer ${@}
+}
+
+console() {
+    docker-compose run --no-deps --rm php bin/console ${@}
+}
+
+codecept() {
+    docker-compose run --no-deps --rm php vendor/bin/codecept ${@}
+}
+
+tests-build() {
+    echo "Clearing cache..."
+    console cache:clear --env=test
+    console doctrine:cache:clear-metadata --env=test
+    console doctrine:cache:clear-query --env=test
+    console doctrine:cache:clear-result --env=test
+
+
+    echo "Creating database..."
+    console doctrine:database:create --env=test -q -n
+    echo "done."
+
+    echo "Clearing database..."
+    console doctrine:schema:drop --force --full-database --env=test
+    echo "done."
+
+    echo "Creating database structure..."
+    console doctrine:migrations:migrate -q --env=test
+    echo "done."
+
+    echo "Loading fixtures..."
+    console doctrine:fixtures:load --no-interaction --append --env=test
+    echo "done."
+
+    console cache:warmup --env=test
+
+    codecept build
+}
+
+tests-run() {
+    if [ "$1" == "--build" ]; then
+        shift
+        tests-build
+    else
+        console cache:warmup --env=test
+    fi
+
+    docker-compose run --no-deps --rm php vendor/bin/codecept run ${@}
+}
+
+fn_exists $COMMAND
+if [ $? -eq 0 ]; then
+    $COMMAND $ARGUMENTS
+else
+    usage
+fi

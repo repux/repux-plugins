@@ -8,8 +8,10 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
         main:
-            pattern: ^/auth/
+            stateless: true
+            pattern: ^/api/
             provider: user_provider_by_auth_token
             anonymous: ~
             guard:
@@ -17,4 +19,6 @@ security:
                     - App\Security\AuthTokenAuthenticator
 
     access_control:
-        - { path: ^/auth/secure, roles: ROLE_USER }
+        - { path: '^/api/shopify-store/store-verify', roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: '^/api/(doc|auth)(/|$)', roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: '^/api/', roles: IS_AUTHENTICATED_FULLY }
