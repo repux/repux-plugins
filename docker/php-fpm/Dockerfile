@@ -15,6 +15,16 @@ RUN apt-get update -y \
     && docker-php-ext-configure gmp \
     && docker-php-ext-install gmp
 
+RUN docker-php-ext-install -j$(nproc) bcmath
+
+RUN docker-php-ext-install pcntl
+
+RUN pecl install xdebug \
+    && docker-php-ext-enable xdebug;
+
+COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+RUN echo "xdebug.remote_host=192.168.20.59" >> /usr/local/etc/php/conf.d/xdebug.ini
+
 RUN curl --insecure https://getcomposer.org/composer.phar -o /usr/bin/composer && chmod +x /usr/bin/composer
 
 # Set timezone
@@ -22,4 +32,4 @@ RUN rm /etc/localtime
 RUN ln -s /usr/share/zoneinfo/Europe/Berlin /etc/localtime
 RUN "date"
 
-WORKDIR /var/www/symfony
+WORKDIR /opt/repux-plugins

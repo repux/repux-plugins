@@ -8,7 +8,6 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
 
 /**
  * @ORM\Entity()
- * @ORM\Table(schema="public")
  */
 class UserAuthToken
 {
