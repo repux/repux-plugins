@@ -22,6 +22,12 @@ fn_exists() {
 up() {
     docker-compose up --build -d ${@}
     composer install
+    printf "Creating databse..."
+    console doctrine:database:create -q -n
+    printf "Runing migrations..."
+    console doctrine:migrations:migrate -q -n
+    printf "Loading fixtures..."
+    console doctrine:fixtures:load -q -n --append
 }
 
 composer() {

@@ -97,7 +97,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Sign in by generating an auth token
+     * Sign in by sending a signed auth message
      *
      * @SWG\Parameter(
      *     in="body",
