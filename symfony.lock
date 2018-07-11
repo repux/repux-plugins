@@ -14,6 +14,9 @@
     "codeception/stub": {
         "version": "2.0.1"
     },
+    "defuse/php-encryption": {
+        "version": "v2.2.0"
+    },
     "digitaldonkey/ecverify": {
         "version": "1.0"
     },
@@ -161,6 +164,9 @@
     "ocramius/proxy-manager": {
         "version": "2.2.0"
     },
+    "paragonie/random_compat": {
+        "version": "v2.0.17"
+    },
     "phar-io/manifest": {
         "version": "1.0.1"
     },
@@ -223,6 +229,9 @@
     },
     "phpunit/phpunit-mock-objects": {
         "version": "6.1.2"
+    },
+    "predis/predis": {
+        "version": "v1.1.1"
     },
     "psr/cache": {
         "version": "1.0.1"
@@ -289,6 +298,15 @@
     },
     "simplito/elliptic-php": {
         "version": "1.0.4"
+    },
+    "snc/redis-bundle": {
+        "version": "2.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "2.0",
+            "ref": "e9c58bfc414cfb7f06e8e5ae9f589868498f5d6a"
+        }
     },
     "stof/doctrine-extensions-bundle": {
         "version": "1.2",

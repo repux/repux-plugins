@@ -3,8 +3,8 @@
 namespace App\Shopify\Authentication;
 
 use App\Entity\ShopifyStore;
-use App\Shopify\Exception\InsufficientScopeException;
-use App\Shopify\Security\HmacSignature;
+use App\Exception\ShopifyInsufficientScopeException;
+use App\Security\HmacSignature;
 use GuzzleHttp\ClientInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -90,7 +90,7 @@ class OAuth
         $responseJson = \GuzzleHttp\json_decode($response->getBody(), true);
 
         if ($responseJson['scope'] !== $this->config['scope']) {
-            throw new InsufficientScopeException($this->config['scope'], $responseJson['scope']);
+            throw new ShopifyInsufficientScopeException($this->config['scope'], $responseJson['scope']);
         }
 
         $accessToken = $responseJson['access_token'];

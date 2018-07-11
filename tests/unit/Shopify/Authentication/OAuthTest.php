@@ -4,7 +4,7 @@ namespace Tests\Unit\App\Shopify\Authentication;
 
 use App\Entity\ShopifyStore;
 use App\Shopify\Authentication\OAuth;
-use App\Shopify\Security\HmacSignature;
+use App\Security\HmacSignature;
 use Codeception\TestCase\Test;
 use Codeception\Util\Stub;
 use GuzzleHttp\Client;
@@ -139,7 +139,7 @@ class OAuthTest extends Test
     }
 
     /**
-     * @expectedException \App\Shopify\Exception\InsufficientScopeException
+     * @expectedException \App\Exception\ShopifyInsufficientScopeException
      * @expectedExceptionMessage Insufficient scope. Requested: "read_orders", granted: "invalid_scope".
      */
     public function testVerifyInvalidScope()

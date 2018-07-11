@@ -16,6 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class DataFile implements UserRelatedInterface
 {
     const ORIGIN_SHOPIFY = 'shopify';
+    const ORIGIN_AMAZON = 'amazon';
 
     use IdentityTrait, TimestampableEntity, BlameableEntity;
 

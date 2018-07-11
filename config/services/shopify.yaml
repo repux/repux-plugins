@@ -1,0 +1,49 @@
+parameters:
+    rabbitmq_shopify_store_process:
+        use_queuing: true
+        routing_key: ''
+    rabbitmq_shopify_store_process.exchange_options:
+        name: shopify_store_process
+        type: topic
+        durable: true
+    rabbitmq_shopify_store_process.queue_options:
+        name: shopify_store_process
+        durable: false
+    shopify.oauth:
+        api_key: '%env(SHOPIFY_API_KEY)%'
+        shared_secret: '%env(SHOPIFY_SECRET_KEY)%'
+        redirect_route_success: '%frontend.url%/dashboard/integrations?shopify=success'
+        redirect_route_fail: '%frontend.url%/dashboard/integrations?shopify=failed'
+        scope: read_orders
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    App\Shopify\:
+        resource: '../../src/Shopify/*'
+        exclude: '../../src/Shopify/{Api/Endpoint, Api/Request, Api/Response}'
+
+    App\Service\Shopify\ShopifyStoreProcessImportOrdersService:
+        public: true
+        arguments:
+            $logger: '@logger'
+
+    guzzle.client.shopify_api:
+        class: GuzzleHttp\Client
+
+    App\Shopify\Authentication\OAuth:
+        public: true
+        arguments:
+            $config: '%shopify.oauth%'
+            $client: '@guzzle.client.shopify_api'
+
+
+    App\Security\HmacSignature:
+        arguments:
+            $sharedSecret: '%env(SHOPIFY_SECRET_KEY)%'
+
+    App\Consumer\ShopifyStoreProcessConsumer:
+        public: true

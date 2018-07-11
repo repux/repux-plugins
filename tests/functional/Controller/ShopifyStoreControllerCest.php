@@ -8,7 +8,7 @@ use App\Entity\User;
 use App\Shopify\Authentication\OAuth;
 use Symfony\Component\HttpFoundation\Response;
 
-class ShopifyStoreCest
+class ShopifyStoreControllerCest
 {
     const BASE_PATH = '/api/shopify-store';
 
