@@ -2,15 +2,16 @@
 
 namespace App\Form;
 
-use App\Entity\ChannelAmazonProcess;
-use App\Form\Field\ChannelAmazonType as ChannelAmazonField;
+use App\Entity\AmazonChannelProcess;
+use App\Form\Field\AmazonChannelType as AmazonChannelField;
 use App\Service\CurrentUserService;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class ChannelAmazonProcessType extends AbstractType
+class AmazonChannelProcessType extends AbstractType
 {
     private $currentUserService;
 
@@ -25,13 +26,13 @@ class ChannelAmazonProcessType extends AbstractType
 
         $builder
             ->add(
-                'channelAmazon',
-                ChannelAmazonField::class,
+                'amazonChannel',
+                AmazonChannelField::class,
                 [
                     'user' => $this->currentUserService->getUser(),
                 ]
             )
-            ->add('type', TextType::class)
+            ->add('type', IntegerType::class)
             ->add('parameters', TextType::class);
     }
 
@@ -39,7 +40,7 @@ class ChannelAmazonProcessType extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'data_class' => ChannelAmazonProcess::class,
+                'data_class' => AmazonChannelProcess::class,
             ]
         );
     }

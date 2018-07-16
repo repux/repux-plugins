@@ -6,7 +6,7 @@ use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebService\Client;
 use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebService\Model\GetReportRequestListRequest;
 use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebService\ClientException;
 use App\Exception\CheckAmazonCredentialsException;
-use App\Entity\ChannelAmazon;
+use App\Entity\AmazonChannel;
 use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebService\Model\TypeList;
 use App\Service\EncryptionService;
 use Psr\Log\LoggerInterface;
@@ -42,20 +42,20 @@ class CheckAmazonCredentialsService
     }
 
     /**
-     * @param ChannelAmazon $channel
+     * @param AmazonChannel $channel
      *
      * @return bool
      * @throws CheckAmazonCredentialsException
      * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
      * @throws \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
      */
-    public function isAuth(ChannelAmazon $channel): bool
+    public function isAuth(AmazonChannel $channel): bool
     {
         if (!in_array($channel->getMarketplaceId(), $this->supportMarketplaseIds)) {
             throw new CheckAmazonCredentialsException("Marketplace ID is not yet supported.");
         }
 
-        $regionAbbr = ChannelAmazon::getMarketplaceRegionByMarketplaceId($channel->getMarketplaceId());
+        $regionAbbr = AmazonChannel::getMarketplaceRegionByMarketplaceId($channel->getMarketplaceId());
 
         /** @var Client $reportsClient */
         $reportsClient = $this->container->get("app_amazon_mws.client.reports.{$regionAbbr}");

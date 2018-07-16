@@ -2,13 +2,13 @@
 
 namespace App\Consumer;
 
-use App\Entity\ChannelAmazonProcess;
+use App\Entity\AmazonChannelProcess;
 use App\Service\AmazonMWS\AmazonChannelProcessImportOrdersService;
 use Doctrine\ORM\EntityManager;
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
 use PhpAmqpLib\Message\AMQPMessage;
 
-class ChannelAmazonProcessConsumer implements ConsumerInterface
+class AmazonChannelProcessConsumer implements ConsumerInterface
 {
     private $entityManager;
 
@@ -28,12 +28,12 @@ class ChannelAmazonProcessConsumer implements ConsumerInterface
         $processId = $msg->getBody();
 
         $process = $this->entityManager
-            ->getRepository(ChannelAmazonProcess::class)
+            ->getRepository(AmazonChannelProcess::class)
             ->find($processId);
 
-        if ($process instanceof ChannelAmazonProcess) {
+        if ($process instanceof AmazonChannelProcess) {
             // Now we only support orders import
-            if ($process->getType() === ChannelAmazonProcess::TYPE_IMPORT_ORDERS) {
+            if ($process->getType() === AmazonChannelProcess::TYPE_IMPORT_ORDERS) {
                 $this->processImportOrdersService->execute($process);
             }
         }

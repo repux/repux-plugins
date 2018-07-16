@@ -11,12 +11,12 @@ use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\ChannelAmazonRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\AmazonChannelRepository")
  * @ORM\HasLifecycleCallbacks()
  *
  * @Serializer\ExclusionPolicy("all")
  */
-class ChannelAmazon implements UserRelatedInterface
+class AmazonChannel implements UserRelatedInterface
 {
     use IdentityTrait, TimestampableEntity, BlameableEntity;
 
@@ -123,14 +123,14 @@ class ChannelAmazon implements UserRelatedInterface
      * @var User|null
      *
      * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", nullable=false)
+     * @ORM\JoinColumn(nullable=false)
      */
     private $user;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="name", type="string", length=128)
+     * @ORM\Column(type="string", length=128)
      *
      * @Serializer\Expose
      */
@@ -139,7 +139,7 @@ class ChannelAmazon implements UserRelatedInterface
     /**
      * @var string
      *
-     * @ORM\Column(name="merchant_id", type="string", length=128, nullable=false)
+     * @ORM\Column(type="string", length=128, nullable=false)
      * @Assert\NotBlank()
      *
      * @Serializer\Expose
@@ -149,7 +149,7 @@ class ChannelAmazon implements UserRelatedInterface
     /**
      * @var string
      *
-     * @ORM\Column(name="marketplace_id", type="string", length=128, nullable=false)
+     * @ORM\Column(type="string", length=128, nullable=false)
      * @Assert\NotBlank()
      *
      * @Serializer\Expose
@@ -159,7 +159,7 @@ class ChannelAmazon implements UserRelatedInterface
     /**
      * @var string
      *
-     * @ORM\Column(name="api_token", type="text", nullable=false)
+     * @ORM\Column(type="text", nullable=false)
      * @Assert\NotBlank()
      *
      */
@@ -168,7 +168,7 @@ class ChannelAmazon implements UserRelatedInterface
     /**
      * @var boolean
      *
-     * @ORM\Column(name="authenticated", type="boolean", nullable=true, options={"default":false})
+     * @ORM\Column(type="boolean", nullable=true, options={"default":false})
      *
      * @Serializer\Expose
      */
@@ -177,7 +177,7 @@ class ChannelAmazon implements UserRelatedInterface
     /**
      * @var integer
      *
-     * @ORM\Column(name="status", type="integer", nullable=true, options={"default":0})
+     * @ORM\Column(type="integer", nullable=true, options={"default":0})
      *
      * @Serializer\Expose
      */
@@ -206,10 +206,10 @@ class ChannelAmazon implements UserRelatedInterface
      * India
      * $serviceUrl = "https://mws.amazonservices.in";
      *
-     * @ORM\Column(name="service_url", type="string", length=128, nullable=true)
+     * @ORM\Column(type="string", length=128, nullable=true)
      *
      */
-    private $serviceUrl = 'https://mws.amazonservices.com';
+    private $serviceUrl = 'http://127.0.0.1:18080';
 
     public function getName()
     {

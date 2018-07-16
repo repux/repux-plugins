@@ -11,6 +11,6 @@ services:
         arguments:
             $producer: '@old_sound_rabbit_mq.shopify_store_process_producer'
 
-    App\Handler\ChannelAmazonProcessHandler:
+    App\Handler\AmazonChannelProcessHandler:
         arguments:
-            $producer: '@old_sound_rabbit_mq.channel_amazon_process_producer'
+            $producer: '@old_sound_rabbit_mq.amazon_channel_process_producer'

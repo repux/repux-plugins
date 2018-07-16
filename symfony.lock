@@ -74,6 +74,9 @@
             "ref": "c1431086fec31f17fbcfe6d6d7e92059458facc1"
         }
     },
+    "doctrine/event-manager": {
+        "version": "v1.0.0"
+    },
     "doctrine/inflector": {
         "version": "v1.3.0"
     },
@@ -88,6 +91,15 @@
     },
     "doctrine/orm": {
         "version": "v2.6.1"
+    },
+    "doctrine/persistence": {
+        "version": "v1.0.0"
+    },
+    "doctrine/reflection": {
+        "version": "v1.0.0"
+    },
+    "donatj/mock-webserver": {
+        "version": "v2.0.0"
     },
     "exsyst/swagger": {
         "version": "v0.4.0"
@@ -247,6 +259,9 @@
     },
     "psr/simple-cache": {
         "version": "1.0.1"
+    },
+    "ralouphie/getallheaders": {
+        "version": "2.0.5"
     },
     "sebastian/code-unit-reverse-lookup": {
         "version": "1.0.1"

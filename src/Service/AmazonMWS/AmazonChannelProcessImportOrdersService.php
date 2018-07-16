@@ -2,7 +2,7 @@
 
 namespace App\Service\AmazonMWS;
 
-use App\Entity\ChannelAmazonProcess;
+use App\Entity\AmazonChannelProcess;
 use App\Entity\DataFile;
 use App\Exception\AmazonThrottleException;
 use App\Handler\DataFileHandler;
@@ -16,7 +16,7 @@ use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebServiceOrders\Model\ListOr
 use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebServiceOrders\Model\ListOrdersRequest;
 use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebServiceOrders\Model\ListOrdersResult;
 use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebServiceOrders\Model\Order;
-use App\Entity\ChannelAmazon;
+use App\Entity\AmazonChannel;
 use Doctrine\ORM\EntityManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\NullOutput;
@@ -52,12 +52,12 @@ class AmazonChannelProcessImportOrdersService
     private $output;
 
     /**
-     * @var ChannelAmazon
+     * @var AmazonChannel
      */
     private $channel;
 
     /**
-     * @var ChannelAmazonProcess
+     * @var AmazonChannelProcess
      */
     private $process;
 
@@ -90,12 +90,12 @@ class AmazonChannelProcessImportOrdersService
         $this->output = new NullOutput();
     }
 
-    public function execute(ChannelAmazonProcess $process)
+    public function execute(AmazonChannelProcess $process)
     {
         $this->filepath = tempnam(sys_get_temp_dir(), self::TEMP_FILE_PREFIX);
 
         $this->process = $process;
-        $this->channel = $process->getChannelAmazon();
+        $this->channel = $process->getAmazonChannel();
 
         try {
             $this->doImport($this->channel);
@@ -106,14 +106,14 @@ class AmazonChannelProcessImportOrdersService
         }
     }
 
-    private function doImport(ChannelAmazon $channel)
+    private function doImport(AmazonChannel $channel)
     {
-        $channel->setStatus(ChannelAmazon::STATUS_IN_PROGRESS);
+        $channel->setStatus(AmazonChannel::STATUS_IN_PROGRESS);
         $this->entityManager->flush();
 
         $this->writeln(sprintf('start: %s', $this->filepath));
 
-        $regionAbbr = ChannelAmazon::getMarketplaceRegionByMarketplaceId($channel->getMarketplaceId());
+        $regionAbbr = AmazonChannel::getMarketplaceRegionByMarketplaceId($channel->getMarketplaceId());
 
         $this->ordersClient = $this->container->get("app_amazon_mws.client.orders.{$regionAbbr}");
         $this->ordersClient->setConfig(['ServiceURL' => $channel->getServiceUrl().'/Orders/2013-09-01']);
@@ -191,16 +191,16 @@ class AmazonChannelProcessImportOrdersService
         if ($ordersProcessed) {
             $dataFile = $this->uploadFile($this->channel, self::ORDERS_FILE_MIME_TYPE);
 
-            $this->process->setStatus(ChannelAmazonProcess::STATUS_SUCCESS);
+            $this->process->setStatus(AmazonChannelProcess::STATUS_SUCCESS);
             $this->process->setData(\json_encode([
                     'dataFileId' => $dataFile->getId(),
                 ]
             ));
         } else {
-            $this->process->setStatus(ChannelAmazonProcess::STATUS_EMPTY_RESPONSE);
+            $this->process->setStatus(AmazonChannelProcess::STATUS_EMPTY_RESPONSE);
         }
 
-        $this->channel->setStatus(ChannelAmazon::STATUS_IDLE);
+        $this->channel->setStatus(AmazonChannel::STATUS_IDLE);
         $this->entityManager->flush();
     }
 
@@ -225,7 +225,10 @@ class AmazonChannelProcessImportOrdersService
         $response = $this->ordersClient->listOrders($request);
         /** @var ListOrdersResult $orders */
         $orders = $response->getListOrdersResult();
-        $this->nextToken = $orders->getNextToken();
+
+        if ($orders) {
+            $this->nextToken = $orders->getNextToken();
+        }
 
         return $orders;
     }
@@ -250,7 +253,10 @@ class AmazonChannelProcessImportOrdersService
 
         $response = $this->ordersClient->listOrdersByNextToken($request);
         $orders = $response->getListOrdersByNextTokenResult();
-        $this->nextToken = $orders->getNextToken();
+
+        if ($orders) {
+            $this->nextToken = $orders->getNextToken();
+        }
 
         return $orders;
     }
@@ -303,12 +309,12 @@ class AmazonChannelProcessImportOrdersService
         $this->logger->info($taggedMessage);
     }
 
-    protected function getApiToken(ChannelAmazon $channel): string
+    protected function getApiToken(AmazonChannel $channel): string
     {
         return $this->encryptionService->decrypt($channel->getApiToken());
     }
 
-    private function uploadFile(ChannelAmazon $channel, string $mimeType = null): DataFile
+    private function uploadFile(AmazonChannel $channel, string $mimeType = null): DataFile
     {
         $user = $channel->getUser();
         $now = new \DateTime();
@@ -330,17 +336,17 @@ class AmazonChannelProcessImportOrdersService
         $period = $parameters['period'] ?? -1;
 
         switch ($period) {
-            case ChannelAmazonProcess::PARAMETER_PERIOD_LAST_MONTH:
+            case AmazonChannelProcess::PARAMETER_PERIOD_LAST_MONTH:
                 $date = new \DateTime();
                 $interval = new \DateInterval('P1M');
                 $date->sub($interval);
                 break;
-            case ChannelAmazonProcess::PARAMETER_PERIOD_LAST_QUARTER:
+            case AmazonChannelProcess::PARAMETER_PERIOD_LAST_QUARTER:
                 $date = new \DateTime();
                 $interval = new \DateInterval('P4M');
                 $date->sub($interval);
                 break;
-            case ChannelAmazonProcess::PARAMETER_PERIOD_ALL:
+            case AmazonChannelProcess::PARAMETER_PERIOD_ALL:
                 $date = new \DateTime('1970-01-01 00:00:00');
                 break;
             default:

@@ -34,6 +34,7 @@
     "require-dev": {
         "codeception/codeception": "^2.4",
         "doctrine/doctrine-fixtures-bundle": "^3.0",
+        "donatj/mock-webserver": "^2.0",
         "symfony/browser-kit": "^4.1",
         "symfony/dotenv": "^4.1",
         "symfony/maker-bundle": "^1.5",

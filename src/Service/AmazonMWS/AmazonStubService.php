@@ -16,7 +16,6 @@ use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebServiceProducts\Client as 
 use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebServiceOrders\Client as MWSOClient;
 use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebServiceProducts\Model\GetMatchingProductForIdRequest;
 use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebServiceProducts\Model\GetMatchingProductForIdResponse;
-use App\Service\AmazonMWS\CheckAmazonCredentialsService;
 use Codeception\Util\Stub;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;

@@ -2,12 +2,12 @@
 
 namespace App\Handler;
 
-use App\Entity\ChannelAmazon;
+use App\Entity\AmazonChannel;
 use App\Service\CurrentUserService;
 use App\Service\EncryptionService;
 use Doctrine\ORM\EntityManager;
 
-class ChannelAmazonHandler
+class AmazonChannelHandler
 {
     private $currentUserService;
 
@@ -30,11 +30,11 @@ class ChannelAmazonHandler
         $user = $this->currentUserService->getUser();
 
         return $this->entityManager
-            ->getRepository(ChannelAmazon::class)
+            ->getRepository(AmazonChannel::class)
             ->findBy(['user' => $user]);
     }
 
-    public function create(ChannelAmazon $channel): ChannelAmazon
+    public function create(AmazonChannel $channel): AmazonChannel
     {
         $user = $this->currentUserService->getUser();
         $channel->setUser($user);

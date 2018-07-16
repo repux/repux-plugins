@@ -3,9 +3,9 @@
 namespace App\Controller;
 
 use App\Controller\Traits\ApiControllerTrait;
-use App\Entity\ChannelAmazonProcess;
-use App\Form\ChannelAmazonProcessType;
-use App\Handler\ChannelAmazonProcessHandler;
+use App\Entity\AmazonChannelProcess;
+use App\Form\AmazonChannelProcessType;
+use App\Handler\AmazonChannelProcessHandler;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -20,29 +20,29 @@ use Symfony\Component\Routing\Annotation\Route;
  *
  * @SWG\Tag(name="Amazon")
  */
-class ChannelAmazonProcessController extends FOSRestController
+class AmazonChannelProcessController extends FOSRestController
 {
     use ApiControllerTrait;
 
     private $handler;
 
     public function __construct(
-        ChannelAmazonProcessHandler $handler
+        AmazonChannelProcessHandler $handler
     ) {
         $this->handler = $handler;
     }
 
     /**
-     * List ChannelAmazonProcess objects
+     * List AmazonChannelProcess objects
      *
      * @SWG\Response(
      *     response=Response::HTTP_OK,
-     *     description="Returns list of ChannelAmazonProcesses",
+     *     description="Returns list of AmazonChannelProcesses",
      *     @SWG\Schema(
      *         type="object",
      *         @SWG\Property(
-     *             property="channel_amazon_processes",
-     *             @SWG\Items(type="object", ref=@Model(type=ChannelAmazonProcess::class))
+     *             property="amazon_channel_processes",
+     *             @SWG\Items(type="object", ref=@Model(type=AmazonChannelProcess::class))
      *         )
      *     )
      * )
@@ -57,28 +57,28 @@ class ChannelAmazonProcessController extends FOSRestController
         $channelAmazonProcesses = $this->handler->getList($channelAmazonId);
 
         return $this->createEntityCollectionView(
-            ChannelAmazonProcess::class,
+            AmazonChannelProcess::class,
             $channelAmazonProcesses,
             count($channelAmazonProcesses)
         );
     }
 
     /**
-     * Save ChannelAmazonProcess object
+     * Save AmazonChannelProcess object
      *
      * @SWG\Parameter(
      *     in="body",
      *     name="data",
      *     @SWG\Schema(
-     *         @SWG\Property(property="channel_amazon_process", ref=@Model(type=ChannelAmazonProcessType::class))
+     *         @SWG\Property(property="amazon_channel_process", ref=@Model(type=AmazonChannelProcessType::class))
      *     )
      * )
      * @SWG\Response(
      *     response=Response::HTTP_OK,
-     *     description="Returns saved ChannelAmazonProcess object",
+     *     description="Returns saved AmazonChannelProcess object",
      *     @SWG\Schema(
      *         type="object",
-     *         @SWG\Property(property="channel_amazon_process", ref=@Model(type=ChannelAmazonProcess::class)),
+     *         @SWG\Property(property="amazon_channel_process", ref=@Model(type=AmazonChannelProcess::class)),
      *     )
      * )
      * @SWG\Response(
@@ -90,12 +90,12 @@ class ChannelAmazonProcessController extends FOSRestController
      */
     public function postAction(Request $request)
     {
-        $form = $this->createForm(ChannelAmazonProcessType::class);
+        $form = $this->createForm(AmazonChannelProcessType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
             if ($form->isValid()) {
-                /** @var ChannelAmazonProcess $channelAmazonProcess */
+                /** @var AmazonChannelProcess $channelAmazonProcess */
                 $channelAmazonProcess = $form->getData();
                 $this->handler->create($channelAmazonProcess);
 

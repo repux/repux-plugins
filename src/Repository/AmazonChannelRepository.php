@@ -6,11 +6,11 @@ use App\Repository\Traits\RepositoryAliasTrait;
 use App\Repository\Traits\UserAwareQueryBuilderTrait;
 use Doctrine\ORM\EntityRepository;
 
-class ChannelAmazonRepository extends EntityRepository
+class AmazonChannelRepository extends EntityRepository
 {
     use RepositoryAliasTrait, UserAwareQueryBuilderTrait;
 
-    const ALIAS = 'channelAmazon';
+    const ALIAS = 'amazonChannel';
 
     public function getById(string $id)
     {

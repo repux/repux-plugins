@@ -3,14 +3,14 @@
 namespace App\Controller;
 
 use App\Controller\Traits\ApiControllerTrait;
-use App\Entity\ChannelAmazon;
-use App\Form\ChannelAmazonType;
-use App\Handler\ChannelAmazonHandler;
+use App\Entity\AmazonChannel;
+use App\Form\AmazonChannelType;
+use App\Handler\AmazonChannelHandler;
 use App\Service\AmazonMWS\CheckAmazonCredentialsService;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use FOS\RestBundle\Controller\FOSRestController;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Swagger\Annotations as SWG;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,7 +21,7 @@ use Symfony\Component\Routing\Annotation\Route;
  *
  * @SWG\Tag(name="Amazon")
  */
-class ChannelAmazonController extends Controller
+class AmazonChannelController extends FOSRestController
 {
     use ApiControllerTrait;
 
@@ -30,7 +30,7 @@ class ChannelAmazonController extends Controller
     private $checkAmazonCredentialsService;
 
     public function __construct(
-        ChannelAmazonHandler $handler,
+        AmazonChannelHandler $handler,
         CheckAmazonCredentialsService $checkAmazonCredentialsService
     ) {
         $this->handler = $handler;
@@ -38,22 +38,18 @@ class ChannelAmazonController extends Controller
     }
 
     /**
-     * Get one ChannelAmazon object
+     * Get all AmazonChannel objects
      *
      * @SWG\Response(
      *     response=Response::HTTP_OK,
-     *     description="Returns a ChannelAmazon object",
+     *     description="Returns list of AmazonChannel objects",
      *     @SWG\Schema(
      *         type="object",
-     *         @SWG\Property(property="channel_amazon", ref=@Model(type=ChannelAmazon::class))
+     *         @SWG\Property(
+     *             property="amazon_channel",
+     *             @SWG\Items(type="object", ref=@Model(type=AmazonChannel::class))
+     *         )
      *     )
-     * )
-     * @SWG\Response(
-     *     response=Response::HTTP_NOT_FOUND,
-     *     description="ChannelAmazon object was not found"
-     * )
-     * @SWG\Parameter(
-     *     name="id", in="path", type="string", description="object ID"
      * )
      *
      * @Rest\Get("")
@@ -63,29 +59,29 @@ class ChannelAmazonController extends Controller
         $channels = $this->handler->getList();
 
         return $this->createEntityCollectionView(
-            ChannelAmazon::class,
+            AmazonChannel::class,
             $channels,
             count($channels)
         );
     }
 
     /**
-     * Save a ChannelAmazon entity object
+     * Save a AmazonChannel entity object
      *
      * @SWG\Parameter(
      *     in="body",
      *     name="data",type="object",
      *     parameter="data",
      *     @SWG\Schema(
-     *         @SWG\Property(property="channel_amazon", ref=@Model(type=ChannelAmazonType::class))
+     *         @SWG\Property(property="amazon_channel", ref=@Model(type=AmazonChannelType::class))
      *     )
      * )
      * @SWG\Response(
      *     response=Response::HTTP_OK,
-     *     description="Returns saved ChannelAmazon object",
+     *     description="Returns saved AmazonChannel object",
      *     @SWG\Schema(
      *         type="object",
-     *         @SWG\Property(property="channel_amazon", ref=@Model(type=ChannelAmazon::class)),
+     *         @SWG\Property(property="amazon_channel", ref=@Model(type=AmazonChannel::class)),
      *         @SWG\Property(property="authorizeUrl", type="string")
      *     )
      * )
@@ -98,11 +94,11 @@ class ChannelAmazonController extends Controller
      */
     public function postAction(Request $request)
     {
-        $form = $this->createForm(ChannelAmazonType::class);
+        $form = $this->createForm(AmazonChannelType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var ChannelAmazon $channelAmazon */
+            /** @var AmazonChannel $channelAmazon */
             $channelAmazon = $form->getData();
 
             if (!$this->checkAmazonCredentialsService->isAuth($channelAmazon)) {
@@ -115,6 +111,6 @@ class ChannelAmazonController extends Controller
             return $this->createEntityView($channelAmazon);
         }
 
-        return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
+        return $this->view($form);
     }
 }

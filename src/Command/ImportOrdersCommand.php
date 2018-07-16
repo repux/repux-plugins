@@ -2,8 +2,8 @@
 
 namespace App\Command;
 
-use App\Entity\ChannelAmazonProcess;
-use App\AmazonMWS\AmazonChannelProcessImportOrdersService;
+use App\Entity\AmazonChannelProcess;
+use App\Service\AmazonMWS\AmazonChannelProcessImportOrdersService;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -30,10 +30,10 @@ class ImportOrdersCommand extends ContainerAwareCommand
         $processId = $input->getOption('process_id');
         $channelAmazonProcess = $this->getContainer()
             ->get('doctrine')
-            ->getRepository(ChannelAmazonProcess::class)
+            ->getRepository(AmazonChannelProcess::class)
             ->find($processId);
 
-        if ($channelAmazonProcess instanceof ChannelAmazonProcess) {
+        if ($channelAmazonProcess instanceof AmazonChannelProcess) {
             $processImportOrdersService = $this->getContainer()
                 ->get(AmazonChannelProcessImportOrdersService::class);
 

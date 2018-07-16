@@ -3,15 +3,15 @@ parameters:
     app_amazon_mws.client.reports.class: App\Service\AmazonMWS\Resources\sdk\MarketplaceWebService\Client
     app_amazon_mws.client.products.class: App\Service\AmazonMWS\Resources\sdk\MarketplaceWebServiceProducts\Client
     app_amazon_mws.client.orders.class: App\Service\AmazonMWS\Resources\sdk\MarketplaceWebServiceOrders\Client
-    rabbitmq_channel_amazon_process:
+    rabbitmq_amazon_channel_process:
         use_queuing: true
         routing_key: ''
-    rabbitmq_channel_amazon_process.exchange_options:
-        name: channel_amazon_process
+    rabbitmq_amazon_channel_process.exchange_options:
+        name: amazon_channel_process
         type: topic
         durable: true
-    rabbitmq_channel_amazon_process.queue_options:
-        name: channel_amazon_process
+    rabbitmq_amazon_channel_process.queue_options:
+        name: amazon_channel_process
         durable: false
     amazon.cn.access_key: '%env(AMAZON_CN_ACCESS_KEY)%'
     amazon.cn.secret_key: '%env(AMAZON_CN_SECRET_KEY)%'
@@ -154,7 +154,7 @@ services:
     App\Service\AmazonMWS\AmazonApiClientFactory:
         $container: '@service_container'
 
-    App\Service\AmazonMWS\Consumer\ChannelAmazonProcessConsumer:
+    App\Service\AmazonMWS\Consumer\AmazonChannelProcessConsumer:
         public: true
 
     App\Service\AmazonMWS\AmazonChannelProcessImportOrdersService:

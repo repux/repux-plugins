@@ -2,15 +2,15 @@
 
 namespace App\Form\Field;
 
-use App\Entity\ChannelAmazon;
-use App\Repository\ChannelAmazonRepository;
+use App\Entity\AmazonChannel;
+use App\Repository\AmazonChannelRepository;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class ChannelAmazonType extends AbstractType
+class AmazonChannelType extends AbstractType
 {
     /**
      * @var EntityManager
@@ -29,10 +29,10 @@ class ChannelAmazonType extends AbstractType
     {
         $resolver->setDefaults([
             'user' => null,
-            'class' => ChannelAmazon::class,
+            'class' => AmazonChannel::class,
             'query_builder' => function (Options $options) {
-                /** @var ChannelAmazonRepository $channelAmazonRepository */
-                $channelAmazonRepository = $this->em->getRepository(ChannelAmazon::class);
+                /** @var AmazonChannelRepository $channelAmazonRepository */
+                $channelAmazonRepository = $this->em->getRepository(AmazonChannel::class);
 
                 return !empty($options['user']) ?
                     $channelAmazonRepository->createQueryBuilderForUser($options['user']) : null;
@@ -53,6 +53,6 @@ class ChannelAmazonType extends AbstractType
      */
     public function getBlockPrefix()
     {
-        return 'channel_amazon_field';
+        return 'amazon_channel_field';
     }
 }

@@ -2,13 +2,13 @@
 
 namespace App\Handler;
 
-use App\Entity\ChannelAmazon;
-use App\Entity\ChannelAmazonProcess;
+use App\Entity\AmazonChannel;
+use App\Entity\AmazonChannelProcess;
 use App\Service\CurrentUserService;
 use Doctrine\ORM\EntityManager;
 use OldSound\RabbitMqBundle\RabbitMq\ProducerInterface;
 
-class ChannelAmazonProcessHandler
+class AmazonChannelProcessHandler
 {
     private $entityManager;
 
@@ -29,19 +29,19 @@ class ChannelAmazonProcessHandler
     public function getList(string $channelAmazonId)
     {
         $channelAmazon = $this->entityManager
-            ->getRepository(ChannelAmazon::class)
+            ->getRepository(AmazonChannel::class)
             ->find($channelAmazonId);
 
-        if ($channelAmazon instanceof ChannelAmazon) {
+        if ($channelAmazon instanceof AmazonChannel) {
             return $this->entityManager
-                ->getRepository(ChannelAmazonProcess::class)
-                ->findBy(['channelAmazon' => $channelAmazon]);
+                ->getRepository(AmazonChannelProcess::class)
+                ->findBy(['amazonChannel' => $channelAmazon]);
         }
     }
 
-    public function create(ChannelAmazonProcess $channelAmazonProcess): ChannelAmazonProcess
+    public function create(AmazonChannelProcess $channelAmazonProcess): AmazonChannelProcess
     {
-        $channelAmazonProcess->setStatus(ChannelAmazonProcess::STATUS_IN_PROGRESS);
+        $channelAmazonProcess->setStatus(AmazonChannelProcess::STATUS_IN_PROGRESS);
 
         $this->entityManager->persist($channelAmazonProcess);
         $this->entityManager->flush();

@@ -78,6 +78,7 @@ tests-run() {
         tests-build
     else
         console cache:warmup --env=test --no-debug
+        codecept build
     fi
 
     docker-compose run --no-deps --rm php vendor/bin/codecept run ${@}

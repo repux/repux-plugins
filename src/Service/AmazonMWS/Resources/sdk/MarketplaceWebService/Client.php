@@ -20,7 +20,7 @@
 namespace App\Service\AmazonMWS\Resources\sdk\MarketplaceWebService;
 
 use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebService\Model;
-use App\App\Entity\ChannelAmazon;
+use App\App\Entity\AmazonChannel;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 

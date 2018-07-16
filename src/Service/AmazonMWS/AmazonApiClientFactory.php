@@ -2,7 +2,7 @@
 
 namespace App\Service\AmazonMWS;
 
-use App\Entity\ChannelAmazon;
+use App\Entity\AmazonChannel;
 use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebService\Client;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
@@ -16,9 +16,9 @@ class AmazonApiClientFactory
         $this->container = $container;
     }
 
-    public function create(ChannelAmazon $channel): Client
+    public function create(AmazonChannel $channel): Client
     {
-        $regionAbbr = ChannelAmazon::getMarketplaceRegionByMarketplaceId($channel->getMarketplaceId());
+        $regionAbbr = AmazonChannel::getMarketplaceRegionByMarketplaceId($channel->getMarketplaceId());
         $serviceName = sprintf('app_amazon_mws.client.%s', $regionAbbr);
         if (!$this->container->has($serviceName)) {
             throw new ServiceNotFoundException(sprintf('Service %s do not exist', $serviceName));

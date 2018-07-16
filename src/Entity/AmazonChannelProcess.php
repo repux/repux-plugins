@@ -13,7 +13,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @Serializer\ExclusionPolicy("all")
  */
-class ChannelAmazonProcess
+class AmazonChannelProcess
 {
     const TYPE_IMPORT_ORDERS = 1;
     const TYPE_IMPORT_CUSTOMERS = 2;
@@ -33,14 +33,13 @@ class ChannelAmazonProcess
     use IdentityTrait, TimestampableEntity;
 
     /**
-     * @var ChannelAmazon|null
+     * @var AmazonChannel|null
      *
-     * @ORM\ManyToOne(targetEntity="ChannelAmazon")
-     * @ORM\JoinColumn(name="channel_amazon_id", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="AmazonChannel")
      *
      * @Assert\NotBlank()
      */
-    private $channelAmazon;
+    private $amazonChannel;
 
     /**
      * @var integer
@@ -85,14 +84,14 @@ class ChannelAmazonProcess
      */
     protected $createdAt;
 
-    public function getChannelAmazon()
+    public function getAmazonChannel()
     {
-        return $this->channelAmazon;
+        return $this->amazonChannel;
     }
 
-    public function setChannelAmazon(ChannelAmazon $channelAmazon)
+    public function setAmazonChannel(AmazonChannel $amazonChannel)
     {
-        $this->channelAmazon = $channelAmazon;
+        $this->amazonChannel = $amazonChannel;
     }
 
     public function getType()
