@@ -53,12 +53,7 @@ class AmazonThrottlingManager
     {
         $key = $this->formKey([$requestId, '*']);
 
-// Commented out because of error: "snc_redis.ERROR: Command "SCAN  amazon_throttling:ListOrderItems[...] 2" failed (ERR syntax error)"
-//
-//        $iterator = null;
-//        return count($this->redis->scan($iterator, $key, $quota));
-
-        return count($this->redis->keys($key)); // TODO: Don't use redis `keys` command
+        return count($this->redis->keys($key)); 
     }
 
     /**

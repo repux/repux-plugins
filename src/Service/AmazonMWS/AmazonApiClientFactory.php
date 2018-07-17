@@ -3,7 +3,7 @@
 namespace App\Service\AmazonMWS;
 
 use App\Entity\AmazonChannel;
-use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebService\Client;
+use App\Service\AmazonMWS\sdk\MarketplaceWebService\Client;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
@@ -11,9 +11,12 @@ class AmazonApiClientFactory
 {
     private $container;
 
-    public function __construct(ContainerInterface $container)
+    private $amazonUrlService;
+
+    public function __construct(ContainerInterface $container, AmazonUrlService $amazonUrlService)
     {
         $this->container = $container;
+        $this->amazonUrlService = $amazonUrlService;
     }
 
     public function create(AmazonChannel $channel): Client
@@ -27,7 +30,7 @@ class AmazonApiClientFactory
         /** @var Client $amazonApiClient */
         $amazonApiClient = $this->container->get($serviceName);
         $amazonApiClient->setConfig([
-            'ServiceURL' => $channel->getServiceUrl(),
+            'ServiceURL' => $this->amazonUrlService->getServiceUrl($channel),
         ]);
 
         return $amazonApiClient;

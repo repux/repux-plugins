@@ -209,9 +209,9 @@ class AmazonChannel implements UserRelatedInterface
      * @ORM\Column(type="string", length=128, nullable=true)
      *
      */
-    private $serviceUrl = 'http://127.0.0.1:18080';
+    private $serviceUrl = 'https://mws.amazonservices.com';
 
-    public function getName()
+    public function getName(): ?string
     {
         return $this->name;
     }
@@ -221,134 +221,90 @@ class AmazonChannel implements UserRelatedInterface
         $this->name = $name;
     }
 
-    /**
-     * @return User|null
-     */
-    public function getUser()
+    public function getUser(): ?User
     {
         return $this->user;
     }
 
-    public function setUser(User $user = null)
+    public function setUser(?User $user)
     {
         $this->user = $user;
     }
 
-    /**
-     * @return string
-     */
-    public function getMerchantId()
+    public function getMerchantId(): ?string
     {
         return $this->merchantId;
     }
 
-    /**
-     * @param string $merchantId
-     */
-    public function setMerchantId($merchantId)
+    public function setMerchantId(?string $merchantId)
     {
         $this->merchantId = $merchantId;
 
         $this->setAuthenticated(false);
     }
 
-    /**
-     * @return string
-     */
-    public function getMarketplaceId()
+    public function getMarketplaceId(): ?string
     {
         return $this->marketplaceId;
     }
 
-    /**
-     * @param string $marketplaceId
-     */
-    public function setMarketplaceId($marketplaceId)
+    public function setMarketplaceId(?string $marketplaceId)
     {
         $this->marketplaceId = $marketplaceId;
 
         $this->setAuthenticated(false);
     }
 
-    /**
-     * @return string
-     */
-    public function getApiToken()
+    public function getApiToken(): ?string
     {
         return $this->apiToken;
     }
 
-    /**
-     * @param string $apiToken
-     */
-    public function setApiToken($apiToken)
+    public function setApiToken(?string $apiToken)
     {
         $this->apiToken = $apiToken;
 
         $this->setAuthenticated(false);
     }
 
-    /**
-     * @return boolean
-     */
-    public function isAuthenticated()
+    public function isAuthenticated(): ?bool
     {
         return $this->authenticated;
     }
 
-    /**
-     * @param boolean $authenticated
-     */
-    public function setAuthenticated($authenticated)
+    public function setAuthenticated(bool $authenticated)
     {
         $this->authenticated = $authenticated;
     }
 
-    /**
-     * @return string
-     */
-    public function getServiceUrl()
+    public function getServiceUrl(): ?string
     {
         return $this->serviceUrl;
     }
 
-    /**
-     * @param string $serviceUrl
-     */
-    public function setServiceUrl($serviceUrl)
+    public function setServiceUrl(?string $serviceUrl)
     {
         $this->serviceUrl = $serviceUrl;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getDefaultCurrencyIso()
+    public function getDefaultCurrencyIso(): string
     {
         return self::$amazonDefaultCurrenciesIso[$this->getMarketplaceId()];
     }
 
-    /**
-     * @return string|null
-     */
-    public function getSiteUrl()
+    public function getSiteUrl(): ?string
     {
         if (isset(self::$amazonSiteUrls[$this->marketplaceId])) {
             return sprintf(self::$amazonSiteUrls[$this->marketplaceId], $this->merchantId);
         }
     }
 
-    /**
-     */
-    public function getMarketplaceAbbrLabel()
+    public function getMarketplaceAbbrLabel(): string
     {
         return $this->getMarketplaceAbbr();
     }
 
-    /**
-     * @return string
-     */
-    public function getMarketplaceAbbr()
+    public function getMarketplaceAbbr(): string
     {
         if (isset(self::$amazonMarketPlaceAbbr[$this->marketplaceId])) {
             return self::$amazonMarketPlaceAbbr[$this->marketplaceId];
@@ -358,10 +314,7 @@ class AmazonChannel implements UserRelatedInterface
         );
     }
 
-    /**
-     * @return string
-     */
-    public function getMarketplaceAddress()
+    public function getMarketplaceAddress(): string
     {
         if (isset(self::$amazonMarketAddress[$this->marketplaceId])) {
             return self::$amazonMarketAddress[$this->marketplaceId];
@@ -371,11 +324,12 @@ class AmazonChannel implements UserRelatedInterface
         );
     }
 
-    /**
-     * @param $marketplaceId
-     * @return mixed
-     */
-    public static function getMarketplaceAbbrByMarketplaceId($marketplaceId)
+    public function isMarketplaceSupported(): bool
+    {
+        return isset(self::$amazonMarketAddress[$this->marketplaceId]);
+    }
+
+    public static function getMarketplaceAbbrByMarketplaceId(?string $marketplaceId): string
     {
         if (isset(self::$amazonMarketPlaceAbbr[$marketplaceId])) {
             return self::$amazonMarketPlaceAbbr[$marketplaceId];
@@ -385,11 +339,7 @@ class AmazonChannel implements UserRelatedInterface
         );
     }
 
-    /**
-     * @param $marketplaceId
-     * @return string
-     */
-    public static function getMarketplaceRegionByMarketplaceId($marketplaceId)
+    public static function getMarketplaceRegionByMarketplaceId(?string $marketplaceId): string
     {
         switch ($marketplaceId) {
             case self::MARKETPLACE_CN:
@@ -405,17 +355,11 @@ class AmazonChannel implements UserRelatedInterface
         }
     }
 
-    /**
-     * @return int
-     */
     public function getStatus(): int
     {
         return $this->status;
     }
 
-    /**
-     * @param int $status
-     */
     public function setStatus(int $status)
     {
         $this->status = $status;

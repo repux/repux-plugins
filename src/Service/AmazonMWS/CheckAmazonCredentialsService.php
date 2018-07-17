@@ -2,12 +2,12 @@
 
 namespace App\Service\AmazonMWS;
 
-use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebService\Client;
-use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebService\Model\GetReportRequestListRequest;
-use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebService\ClientException;
+use App\Service\AmazonMWS\sdk\MarketplaceWebService\Client;
+use App\Service\AmazonMWS\sdk\MarketplaceWebService\Model\GetReportRequestListRequest;
+use App\Service\AmazonMWS\sdk\MarketplaceWebService\ClientException;
 use App\Exception\CheckAmazonCredentialsException;
 use App\Entity\AmazonChannel;
-use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebService\Model\TypeList;
+use App\Service\AmazonMWS\sdk\MarketplaceWebService\Model\TypeList;
 use App\Service\EncryptionService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -22,23 +22,20 @@ class CheckAmazonCredentialsService
 
     private $logger;
 
-    private $supportMarketplaseIds = [
-        'AAHKV2X7AFYLW', //CN
-        'A2EUQ1WTGCTBG2', //CA
-        'ATVPDKIKX0DER', //US
-        'A1AM78C64UM0Y8', //MX
-    ];
+    private $amazonUrlService;
 
     public function __construct(
         AmazonThrottlingService $throttlingService,
         EncryptionService $encryptionService,
         ContainerInterface $container,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        AmazonUrlService $amazonUrlService
     ) {
         $this->throttlingService = $throttlingService;
         $this->encryptionService = $encryptionService;
         $this->container = $container;
         $this->logger = $logger;
+        $this->amazonUrlService = $amazonUrlService;
     }
 
     /**
@@ -51,7 +48,7 @@ class CheckAmazonCredentialsService
      */
     public function isAuth(AmazonChannel $channel): bool
     {
-        if (!in_array($channel->getMarketplaceId(), $this->supportMarketplaseIds)) {
+        if (!$channel->isMarketplaceSupported()) {
             throw new CheckAmazonCredentialsException("Marketplace ID is not yet supported.");
         }
 
@@ -59,7 +56,7 @@ class CheckAmazonCredentialsService
 
         /** @var Client $reportsClient */
         $reportsClient = $this->container->get("app_amazon_mws.client.reports.{$regionAbbr}");
-        $reportsClient->setConfig(['ServiceURL' => $channel->getServiceUrl()]);
+        $reportsClient->setConfig(['ServiceURL' => $this->amazonUrlService->getServiceUrl($channel)]);
 
         $parameters = [
             'Merchant' => $channel->getMerchantId(),

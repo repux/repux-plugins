@@ -26,7 +26,6 @@ class EncryptionService
     public function __construct(string $secret)
     {
         $this->secret = $secret;
-        $this->key = Key::loadFromAsciiSafeString($this->secret);
     }
 
     /**
@@ -40,6 +39,8 @@ class EncryptionService
         if (empty($value) || $this->checkEncrypted($value)) {
             return $value;
         }
+
+        $this->loadKey();
 
         return $this->addEncryptedCheck(Crypto::encrypt($value, $this->key));
     }
@@ -59,6 +60,8 @@ class EncryptionService
 
         $withoutCHeck = $this->removeEncryptedCheck($value);
 
+        $this->loadKey();
+
         $decrypted = Crypto::decrypt($withoutCHeck, $this->key, false);
 
         return $decrypted;
@@ -77,5 +80,12 @@ class EncryptionService
     private function removeEncryptedCheck(string $value)
     {
         return str_replace(self::ENCRYPTED_CHECK, '', $value);
+    }
+
+    private function loadKey()
+    {
+        if (!$this->key) {
+            $this->key = Key::loadFromAsciiSafeString($this->secret);
+        }
     }
 }

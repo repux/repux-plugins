@@ -8,14 +8,14 @@ use App\Exception\AmazonThrottleException;
 use App\Handler\DataFileHandler;
 use App\Service\ArrayToCsvService;
 use App\Service\EncryptionService;
-use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebServiceOrders\Client as OrdersClient;
-use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebServiceOrders\ClientException as AmazonOrdersException;
-use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebServiceOrders\ClientException;
-use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebServiceOrders\Model\ListOrdersByNextTokenRequest;
-use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebServiceOrders\Model\ListOrdersByNextTokenResult;
-use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebServiceOrders\Model\ListOrdersRequest;
-use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebServiceOrders\Model\ListOrdersResult;
-use App\Service\AmazonMWS\Resources\sdk\MarketplaceWebServiceOrders\Model\Order;
+use App\Service\AmazonMWS\sdk\MarketplaceWebServiceOrders\Client as OrdersClient;
+use App\Service\AmazonMWS\sdk\MarketplaceWebServiceOrders\ClientException as AmazonOrdersException;
+use App\Service\AmazonMWS\sdk\MarketplaceWebServiceOrders\ClientException;
+use App\Service\AmazonMWS\sdk\MarketplaceWebServiceOrders\Model\ListOrdersByNextTokenRequest;
+use App\Service\AmazonMWS\sdk\MarketplaceWebServiceOrders\Model\ListOrdersByNextTokenResult;
+use App\Service\AmazonMWS\sdk\MarketplaceWebServiceOrders\Model\ListOrdersRequest;
+use App\Service\AmazonMWS\sdk\MarketplaceWebServiceOrders\Model\ListOrdersResult;
+use App\Service\AmazonMWS\sdk\MarketplaceWebServiceOrders\Model\Order;
 use App\Entity\AmazonChannel;
 use Doctrine\ORM\EntityManager;
 use Psr\Log\LoggerInterface;
@@ -30,8 +30,6 @@ class AmazonChannelProcessImportOrdersService
     const ORDERS_FILE_MIME_TYPE = 'text/csv';
     const THROTTLING_SLEEP_SECONDS = 15;
 
-    private $amazonStubService;
-
     private $entityManager;
 
     private $amazonThrottlingService;
@@ -45,6 +43,8 @@ class AmazonChannelProcessImportOrdersService
     private $arrayToCsvService;
 
     private $dataFileHandler;
+
+    private $amazonUrlService;
 
     /**
      * @var OutputInterface
@@ -71,22 +71,22 @@ class AmazonChannelProcessImportOrdersService
 
     public function __construct(
         EntityManager $entityManager,
-        AmazonStubService $amazonStubService,
         AmazonThrottlingService $amazonThrottlingService,
         EncryptionService $encryptionService,
         LoggerInterface $logger,
         ContainerInterface $container,
         ArrayToCsvService $arrayToCsvService,
-        DataFileHandler $dataFileHandler
+        DataFileHandler $dataFileHandler,
+        AmazonUrlService $amazonUrlService
     ) {
         $this->entityManager = $entityManager;
-        $this->amazonStubService = $amazonStubService;
         $this->amazonThrottlingService = $amazonThrottlingService;
         $this->encryptionService = $encryptionService;
         $this->logger = $logger;
         $this->container = $container;
         $this->arrayToCsvService = $arrayToCsvService;
         $this->dataFileHandler = $dataFileHandler;
+        $this->amazonUrlService = $amazonUrlService;
         $this->output = new NullOutput();
     }
 
@@ -116,7 +116,9 @@ class AmazonChannelProcessImportOrdersService
         $regionAbbr = AmazonChannel::getMarketplaceRegionByMarketplaceId($channel->getMarketplaceId());
 
         $this->ordersClient = $this->container->get("app_amazon_mws.client.orders.{$regionAbbr}");
-        $this->ordersClient->setConfig(['ServiceURL' => $channel->getServiceUrl().'/Orders/2013-09-01']);
+        $this->ordersClient->setConfig([
+            'ServiceURL' => sprintf('%s//Orders/2013-09-01', $this->amazonUrlService->getServiceUrl($channel))
+        ]);
         $this->ordersClient->setOutput($this->output);
 
         $repeatRequest = false;
@@ -135,7 +137,7 @@ class AmazonChannelProcessImportOrdersService
                 if ($ex->getStatusCode() == 503) {
                     $repeatRequest = true;
                     $this->writeln(sprintf('Request throttled by amazon'));
-                    sleep(self::THROTTLING_SLEEP_SECONDS); // sorry i'm bad bad bad programmer :(
+                    sleep(self::THROTTLING_SLEEP_SECONDS);
                 }
                 $this->writeln(sprintf('Error: %s', $ex->getMessage()));
             } catch (\Exception $ex) {
@@ -290,11 +292,6 @@ class AmazonChannelProcessImportOrdersService
         $data['isPrime'] = $order->getIsPrime();
 
         return $data;
-    }
-
-    public function setMocksPath(string $mocksPath)
-    {
-        $this->amazonStubService->init($mocksPath);
     }
 
     public function setOutput(OutputInterface $output)

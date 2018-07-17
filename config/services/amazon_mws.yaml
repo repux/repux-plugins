@@ -1,8 +1,8 @@
 parameters:
-    app_amazon_mws.client.class: App\Service\AmazonMWS\Resources\sdk\MarketplaceWebService\Client
-    app_amazon_mws.client.reports.class: App\Service\AmazonMWS\Resources\sdk\MarketplaceWebService\Client
-    app_amazon_mws.client.products.class: App\Service\AmazonMWS\Resources\sdk\MarketplaceWebServiceProducts\Client
-    app_amazon_mws.client.orders.class: App\Service\AmazonMWS\Resources\sdk\MarketplaceWebServiceOrders\Client
+    app_amazon_mws.client.class: App\Service\AmazonMWS\sdk\MarketplaceWebService\Client
+    app_amazon_mws.client.reports.class: App\Service\AmazonMWS\sdk\MarketplaceWebService\Client
+    app_amazon_mws.client.products.class: App\Service\AmazonMWS\sdk\MarketplaceWebServiceProducts\Client
+    app_amazon_mws.client.orders.class: App\Service\AmazonMWS\sdk\MarketplaceWebServiceOrders\Client
     rabbitmq_amazon_channel_process:
         use_queuing: true
         routing_key: ''
@@ -29,6 +29,7 @@ parameters:
     amazon.cn.merchant_id: '4'
     amazon.cn.marketplace_id: AAHKV2X7AFYLW
     amazon.cn.api_token: '6'
+    amazon.service_url: '%env(AMAZON_SERVICE_URL)%'
 
 services:
     _defaults:
@@ -148,9 +149,6 @@ services:
         tags:
             - { name: monolog.logger, channel: integrations }
 
-    App\Service\AmazonMWS\AmazonStubService:
-        $container: '@service_container'
-
     App\Service\AmazonMWS\AmazonApiClientFactory:
         $container: '@service_container'
 
@@ -163,3 +161,7 @@ services:
             $logger: '@logger'
         tags:
             - { name: monolog.logger, channel: integrations }
+
+    App\Service\AmazonMWS\AmazonUrlService:
+        arguments:
+            $fixedUrl: '%amazon.service_url%'

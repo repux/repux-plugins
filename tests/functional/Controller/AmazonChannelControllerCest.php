@@ -62,11 +62,12 @@ class AmazonChannelControllerCest
             ],
         ];
 
-        $this->amazonMockRequest('GetReportRequestList', 'ok_empty');
+        $this->amazonMockRequest('response/GetReportRequestList/ok_empty.xml');
 
         $I->sendPOST(self::BASE_PATH, $data);
 
         $request = $this->server->getLastRequest();
+        $I->assertNotNull($request);
         $I->assertArraySubset(
             [
                 'Merchant' => 'merchant',
@@ -115,12 +116,12 @@ class AmazonChannelControllerCest
         return $I->grabEntityFromRepository(AmazonChannel::class, ['id' => $id]);
     }
 
-    private function amazonMockRequest(string $action, string $responseFile, string $path = '/', int $status = 200)
+    private function amazonMockRequest(string $responseMockPath, string $path = '/', int $status = 200)
     {
         $this->server->setResponseOfPath(
             $path,
             new \donatj\MockWebServer\Response(
-                file_get_contents(codecept_data_dir(sprintf('amazon/response/%s/%s.xml', $action, $responseFile))),
+                file_get_contents(codecept_data_dir(sprintf('amazon/%s', $responseMockPath))),
                 [
                     'x-mws-request-id' => 1,
                     'x-mws-response-context' => 'context',
