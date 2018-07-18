@@ -6,11 +6,11 @@ services:
             POSTGRES_PASSWORD: passwd
         ports:
             - '5433:5432'
+        networks:
+          - docker-network
 
     php:
         build: docker/php-fpm
-        ports:
-            - '9002:9000'
         volumes:
             - ./:/opt/repux-plugins
         links:
@@ -19,8 +19,10 @@ services:
           - 9000
         environment:
             PHP_XDEBUG_ENABLED: 1
-            XDEBUG_CONFIG: remote_host=192.168.20.59
+            XDEBUG_CONFIG: remote_host=10.254.254.254
             PHP_IDE_CONFIG: serverName=repux-plugins
+        networks:
+          - docker-network
 
     nginx:
         build: docker/nginx
@@ -31,8 +33,22 @@ services:
         volumes:
             - ./:/opt/repux-plugins
             - ./docker/logs/nginx/:/var/log/nginx
+        networks:
+          - docker-network
 
     rabbitmq:
         build: docker/rabbitmq
         ports:
           - 15672:15672
+        networks:
+          - docker-network
+
+    redis:
+        image: redis:latest
+        command: redis-server --requirepass 8527e448960311e58cc9005056b56293
+        networks:
+          - docker-network
+
+networks:
+  docker-network:
+    external: true

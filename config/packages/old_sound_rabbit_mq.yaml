@@ -8,9 +8,18 @@ old_sound_rabbit_mq:
             connection: default
             exchange_options: '%rabbitmq_shopify_store_process.exchange_options%'
             queue_options: '%rabbitmq_shopify_store_process.queue_options%'
+        amazon_channel_process:
+            connection: default
+            exchange_options: '%rabbitmq_amazon_channel_process.exchange_options%'
+            queue_options: '%rabbitmq_amazon_channel_process.queue_options%'
     consumers:
         shopify_store_process:
             connection: default
             exchange_options: '%rabbitmq_shopify_store_process.exchange_options%'
             queue_options: '%rabbitmq_shopify_store_process.queue_options%'
-            callback: App\Shopify\Consumer\ShopifyStoreProcessConsumer
+            callback: App\Consumer\ShopifyStoreProcessConsumer
+        amazon_channel_process:
+            connection: default
+            exchange_options: '%rabbitmq_amazon_channel_process.exchange_options%'
+            queue_options: '%rabbitmq_amazon_channel_process.queue_options%'
+            callback: App\Consumer\AmazonChannelProcessConsumer

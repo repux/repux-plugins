@@ -17,6 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/api/shopify-store-process")
+ *
  * @SWG\Tag(name="Shopify")
  */
 class ShopifyStoreProcessController extends FOSRestController

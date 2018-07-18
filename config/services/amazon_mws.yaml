@@ -1,0 +1,167 @@
+parameters:
+    app_amazon_mws.client.class: App\Service\AmazonMWS\sdk\MarketplaceWebService\Client
+    app_amazon_mws.client.reports.class: App\Service\AmazonMWS\sdk\MarketplaceWebService\Client
+    app_amazon_mws.client.products.class: App\Service\AmazonMWS\sdk\MarketplaceWebServiceProducts\Client
+    app_amazon_mws.client.orders.class: App\Service\AmazonMWS\sdk\MarketplaceWebServiceOrders\Client
+    rabbitmq_amazon_channel_process:
+        use_queuing: true
+        routing_key: ''
+    rabbitmq_amazon_channel_process.exchange_options:
+        name: amazon_channel_process
+        type: topic
+        durable: true
+    rabbitmq_amazon_channel_process.queue_options:
+        name: amazon_channel_process
+        durable: false
+    amazon.cn.access_key: '%env(AMAZON_CN_ACCESS_KEY)%'
+    amazon.cn.secret_key: '%env(AMAZON_CN_SECRET_KEY)%'
+    amazon.cn.application_name: '%env(AMAZON_CN_APP_NAME)%'
+    amazon.cn.application_version: '%env(AMAZON_CN_APP_VERSION)%'
+    amazon.cn.config: null
+    amazon.na.access_key: '%env(AMAZON_NA_ACCESS_KEY)%'
+    amazon.na.secret_key: '%env(AMAZON_NA_SECRET_KEY)%'
+    amazon.na.application_name: '%env(AMAZON_NA_APP_NAME)%'
+    amazon.na.application_version: '%env(AMAZON_NA_APP_VERSION)%'
+    amazon.na.config: null
+    amazon_orders_interval_spec: '%env(AMAZON_ORDERS_INTERVAL_SPEC)%'
+    amazon_orders_check_api_interval_spec: '%env(AMAZON_ORDERS_CHECK_API_INTERVAL_SPEC)%'
+    amazon_log_requests: '%env(bool:AMAZON_LOG_REQUESTS)%'
+    amazon.cn.merchant_id: '4'
+    amazon.cn.marketplace_id: AAHKV2X7AFYLW
+    amazon.cn.api_token: '6'
+    amazon.service_url: '%env(AMAZON_SERVICE_URL)%'
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    App\Service\AmazonMWS\:
+        resource: '../../src/Service/AmazonMWS/*'
+        exclude: '../../src/Service/AmazonMWS/{Resources}'
+
+    app_amazon_mws.client.NA:
+        class: '%app_amazon_mws.client.class%'
+        public: true
+        arguments:
+            - '%amazon.na.access_key%'
+            - '%amazon.na.secret_key%'
+            - '%amazon.na.config%'
+            - '%amazon.na.application_name%'
+            - '%amazon.na.application_version%'
+        calls:
+            - [setAmazonLogRequests, ['%amazon_log_requests%']]
+
+    app_amazon_mws.client.reports.NA:
+        class: '%app_amazon_mws.client.reports.class%'
+        public: true
+        arguments:
+            - '%amazon.na.access_key%'
+            - '%amazon.na.secret_key%'
+            - '%amazon.na.config%'
+            - '%amazon.na.application_name%'
+            - '%amazon.na.application_version%'
+        calls:
+            - [setAmazonLogRequests, ['%amazon_log_requests%']]
+
+    app_amazon_mws.client.products.NA:
+        class: '%app_amazon_mws.client.products.class%'
+        public: true
+        arguments:
+            - '%amazon.na.access_key%'
+            - '%amazon.na.secret_key%'
+            - '%amazon.na.application_name%'
+            - '%amazon.na.application_version%'
+            - '%amazon.na.config%'
+        calls:
+            - [setAmazonLogRequests, ['%amazon_log_requests%']]
+
+    app_amazon_mws.client.orders.NA:
+        class: '%app_amazon_mws.client.orders.class%'
+        public: true
+        arguments:
+            - '%amazon.na.access_key%'
+            - '%amazon.na.secret_key%'
+            - '%amazon.na.application_name%'
+            - '%amazon.na.application_version%'
+            - '%amazon.na.config%'
+        calls:
+            - [setAmazonLogRequests, ['%amazon_log_requests%']]
+
+    app_amazon_mws.client.CN:
+        class: '%app_amazon_mws.client.class%'
+        public: true
+        arguments:
+            - '%amazon.cn.access_key%'
+            - '%amazon.cn.secret_key%'
+            - '%amazon.cn.application_name%'
+            - '%amazon.cn.application_version%'
+            - '%amazon.cn.config%'
+        calls:
+            - [setAmazonLogRequests, ['%amazon_log_requests%']]
+
+    app_amazon_mws.client.reports.CN:
+        class: '%app_amazon_mws.client.reports.class%'
+        public: true
+        arguments:
+            - '%amazon.cn.access_key%'
+            - '%amazon.cn.secret_key%'
+            - '%amazon.cn.config%'
+            - '%amazon.cn.application_name%'
+            - '%amazon.cn.application_version%'
+        calls:
+            - [setAmazonLogRequests, ['%amazon_log_requests%']]
+
+    app_amazon_mws.client.products.CN:
+        class: '%app_amazon_mws.client.products.class%'
+        public: true
+        arguments:
+            - '%amazon.cn.access_key%'
+            - '%amazon.cn.secret_key%'
+            - '%amazon.cn.application_name%'
+            - '%amazon.cn.application_version%'
+            - '%amazon.cn.config%'
+        calls:
+            - [setAmazonLogRequests, ['%amazon_log_requests%']]
+
+    app_amazon_mws.client.orders.CN:
+        class: '%app_amazon_mws.client.orders.class%'
+        public: true
+        arguments:
+            - '%amazon.cn.access_key%'
+            - '%amazon.cn.secret_key%'
+            - '%amazon.cn.application_name%'
+            - '%amazon.cn.application_version%'
+            - '%amazon.cn.config%'
+        calls:
+            - [setAmazonLogRequests, ['%amazon_log_requests%']]
+
+
+    App\Service\AmazonMWS\AmazonThrottlingManager:
+        arguments:
+             $redis: '@snc_redis.default'
+
+    App\Service\AmazonMWS\CheckAmazonCredentialsService:
+        arguments:
+            $container: '@service_container'
+            $logger: '@logger'
+        tags:
+            - { name: monolog.logger, channel: integrations }
+
+    App\Service\AmazonMWS\AmazonApiClientFactory:
+        $container: '@service_container'
+
+    App\Service\AmazonMWS\Consumer\AmazonChannelProcessConsumer:
+        public: true
+
+    App\Service\AmazonMWS\AmazonChannelProcessImportOrdersService:
+        public: true
+        arguments:
+            $logger: '@logger'
+        tags:
+            - { name: monolog.logger, channel: integrations }
+
+    App\Service\AmazonMWS\AmazonUrlService:
+        arguments:
+            $fixedUrl: '%amazon.service_url%'

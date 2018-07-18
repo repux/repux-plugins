@@ -22,8 +22,11 @@ RUN docker-php-ext-install pcntl
 RUN pecl install xdebug \
     && docker-php-ext-enable xdebug;
 
+RUN docker-php-ext-install sockets
+RUN apt-get update && apt-get install -y procps
+
 COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
-RUN echo "xdebug.remote_host=192.168.20.59" >> /usr/local/etc/php/conf.d/xdebug.ini
+RUN echo "xdebug.remote_host=10.254.254.254" >> /usr/local/etc/php/conf.d/xdebug.ini
 
 RUN curl --insecure https://getcomposer.org/composer.phar -o /usr/bin/composer && chmod +x /usr/bin/composer
 

@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<ListOrdersResponse xmlns="https://mws.amazonservices.com/Orders/2013-09-01">
+    <ListOrdersResult>
+        <Orders>
+            <Order>
+                <LatestShipDate>2016-02-03T15:59:59Z</LatestShipDate>
+                <OrderType>StandardOrder</OrderType>
+                <PurchaseDate>2016-02-01T11:20:31Z</PurchaseDate>
+                <AmazonOrderId>C03-5216593-2769657</AmazonOrderId>
+                <BuyerEmail>test@marketplace.amazon.cn</BuyerEmail>
+                <LastUpdateDate>2016-02-01T11:25:32Z</LastUpdateDate>
+                <ShipServiceLevel>Std CN D2D 5</ShipServiceLevel>
+                <NumberOfItemsShipped>0</NumberOfItemsShipped>
+                <OrderStatus>Unshipped</OrderStatus>
+                <SalesChannel>亚马逊</SalesChannel>
+                <ShippedByAmazonTFM>false</ShippedByAmazonTFM>
+                <NumberOfItemsUnshipped>1</NumberOfItemsUnshipped>
+                <LatestDeliveryDate>2016-02-16T15:59:59Z</LatestDeliveryDate>
+                <BuyerName>john smith</BuyerName>
+                <EarliestDeliveryDate>2016-02-02T16:00:00Z</EarliestDeliveryDate>
+                <OrderTotal>
+                    <CurrencyCode>CNY</CurrencyCode>
+                    <Amount>15.00</Amount>
+                </OrderTotal>
+                <IsPremiumOrder>false</IsPremiumOrder>
+                <EarliestShipDate>2016-02-01T16:00:00Z</EarliestShipDate>
+                <MarketplaceId>AAHKV2X7AFYLW</MarketplaceId>
+                <FulfillmentChannel>MFN</FulfillmentChannel>
+                <PaymentMethod>Other</PaymentMethod>
+                <ShippingAddress>
+                    <StateOrRegion>北京</StateOrRegion>
+                    <City>北京市</City>
+                    <Phone>6142011338618</Phone>
+                    <CountryCode>CN</CountryCode>
+                    <PostalCode>100085</PostalCode>
+                    <County>海淀区</County>
+                    <Name>john smith</Name>
+                    <AddressLine1>34 Test West Road,</AddressLine1>
+                </ShippingAddress>
+                <IsPrime>false</IsPrime>
+                <ShipmentServiceLevelCategory>Priority</ShipmentServiceLevelCategory>
+            </Order>
+        </Orders>
+        <CreatedBefore>2016-02-04T11:08:37Z</CreatedBefore>
+    </ListOrdersResult>
+    <ResponseMetadata>
+        <RequestId>77c542dc-0b7c-4bc5-af97-5006c61f7c76</RequestId>
+    </ResponseMetadata>
+</ListOrdersResponse>
