@@ -12,8 +12,6 @@ parameters:
     shopify.oauth:
         api_key: '%env(SHOPIFY_API_KEY)%'
         shared_secret: '%env(SHOPIFY_SECRET_KEY)%'
-        redirect_route_success: '%frontend.url%/dashboard/integrations?shopify=success'
-        redirect_route_fail: '%frontend.url%/dashboard/integrations?shopify=failed'
         scope: read_orders
 
 services:
