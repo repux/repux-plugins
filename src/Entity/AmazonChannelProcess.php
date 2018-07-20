@@ -30,6 +30,10 @@ class AmazonChannelProcess
     const PARAMETER_PERIOD_LAST_QUARTER = 3;
     const PARAMETER_PERIOD_ALL = 'all';
 
+    const SUPPORTED_TYPES = [
+        self::TYPE_IMPORT_ORDERS,
+    ];
+
     use IdentityTrait, TimestampableEntity;
 
     /**
@@ -47,6 +51,7 @@ class AmazonChannelProcess
      * @ORM\Column(name="type", type="integer")
      *
      * @Assert\NotBlank()
+     * @Assert\Choice(choices=AmazonChannelProcess::SUPPORTED_TYPES)
      *
      * @Serializer\Expose
      */
