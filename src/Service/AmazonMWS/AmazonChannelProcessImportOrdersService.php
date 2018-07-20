@@ -117,7 +117,7 @@ class AmazonChannelProcessImportOrdersService
 
         $this->ordersClient = $this->container->get("app_amazon_mws.client.orders.{$regionAbbr}");
         $this->ordersClient->setConfig([
-            'ServiceURL' => sprintf('%s//Orders/2013-09-01', $this->amazonUrlService->getServiceUrl($channel))
+            'ServiceURL' => sprintf('%s/Orders/2013-09-01', $this->amazonUrlService->getServiceUrl($channel))
         ]);
         $this->ordersClient->setOutput($this->output);
 
