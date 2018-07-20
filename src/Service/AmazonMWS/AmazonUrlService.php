@@ -8,9 +8,9 @@ class AmazonUrlService
 {
     private $fixedUrl;
 
-    public function __construct(string $fixedUrl)
+    public function __construct(?string $fixedUrl)
     {
-        $this->fixedUrl = $fixedUrl;
+        $this->fixedUrl = $fixedUrl ? $fixedUrl : null;
     }
 
     public function getServiceUrl(AmazonChannel $amazonChannel)

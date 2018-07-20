@@ -1,6 +1,5 @@
 parameters:
     locale: 'en'
-    frontend.url: '%env(FRONTEND_URL)%'
 
 imports:
     - { resource: services/* }
