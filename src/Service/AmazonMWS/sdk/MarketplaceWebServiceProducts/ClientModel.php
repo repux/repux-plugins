@@ -20,7 +20,7 @@
 
 namespace App\Service\AmazonMWS\sdk\MarketplaceWebServiceProducts;
 
-define('PRODUCTS_MODEL_NAMESPACE', 'App\\AmazonMWS\Resources\\sdk\\MarketplaceWebServiceProducts\\Model\\');
+define('PRODUCTS_MODEL_NAMESPACE', 'App\\Service\\AmazonMWS\\sdk\\MarketplaceWebServiceProducts\\Model\\');
 
 /**
  * ClientModel - base class for all model classes

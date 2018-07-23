@@ -4,13 +4,11 @@ namespace App\Service\AmazonMWS;
 
 use App\Entity\AmazonChannelProcess;
 use App\Entity\DataFile;
-use App\Exception\AmazonThrottleException;
 use App\Handler\DataFileHandler;
 use App\Service\ArrayToCsvService;
 use App\Service\EncryptionService;
 use App\Service\AmazonMWS\sdk\MarketplaceWebServiceOrders\Client as OrdersClient;
 use App\Service\AmazonMWS\sdk\MarketplaceWebServiceOrders\ClientException as AmazonOrdersException;
-use App\Service\AmazonMWS\sdk\MarketplaceWebServiceOrders\ClientException;
 use App\Service\AmazonMWS\sdk\MarketplaceWebServiceOrders\Model\ListOrdersByNextTokenRequest;
 use App\Service\AmazonMWS\sdk\MarketplaceWebServiceOrders\Model\ListOrdersByNextTokenResult;
 use App\Service\AmazonMWS\sdk\MarketplaceWebServiceOrders\Model\ListOrdersRequest;
@@ -122,15 +120,16 @@ class AmazonChannelProcessImportOrdersService
         $this->ordersClient->setOutput($this->output);
 
         $repeatRequest = false;
+        $hasOrders = false;
+        $this->nextToken = null;
+        
         do {
             try {
-                $this->nextToken = null;
-
                 $lastSyncAt = new \DateTime('now');
                 $lastSyncAt->setTimezone(new \DateTimeZone('UTC'));
 
                 do {
-                    $this->processOrders();
+                    $hasOrders |= $this->processOrders();
                 } while (!empty($this->nextToken));
                 $repeatRequest = false;
             } catch (AmazonOrdersException $ex) {
@@ -141,13 +140,29 @@ class AmazonChannelProcessImportOrdersService
                 }
                 $this->writeln(sprintf('Error: %s', $ex->getMessage()));
             } catch (\Exception $ex) {
-                $repeatRequest = false;
                 $this->writeln(sprintf('Error: %s', $ex->getMessage()));
+
+                return;
             }
         } while ($repeatRequest);
+
+        if ($hasOrders) {
+            $dataFile = $this->uploadFile($this->channel, self::ORDERS_FILE_MIME_TYPE);
+
+            $this->process->setStatus(AmazonChannelProcess::STATUS_SUCCESS);
+            $this->process->setData(\json_encode([
+                    'dataFileId' => $dataFile->getId(),
+                ]
+            ));
+        } else {
+            $this->process->setStatus(AmazonChannelProcess::STATUS_EMPTY_RESPONSE);
+        }
+
+        $this->channel->setStatus(AmazonChannel::STATUS_IDLE);
+        $this->entityManager->flush();
     }
 
-    private function processOrders()
+    private function processOrders(): bool
     {
         if (empty($this->nextToken)) {
             /** @var ListOrdersResult $listOrdersResult */
@@ -170,40 +185,17 @@ class AmazonChannelProcessImportOrdersService
                     $this->arrayToCsvService->save($this->filepath, $data);
                     $ordersProcessed++;
                     unset($orders[key($orders)]);
-                } catch (AmazonThrottleException $ex) {
-                    //do nothing, just wait
-                    $this->writeln('throttled internal');
-                    sleep(self::THROTTLING_SLEEP_SECONDS);
-                } catch (AmazonOrdersException $ex) {
-                    /** @var ClientException $ex */
-                    if ($ex->getStatusCode() == 503) {
-                        $this->output->writeln(sprintf('Channel %s has been throttled', $this->channel->getId()));
-                        sleep(self::THROTTLING_SLEEP_SECONDS);
-                    }
-                    $this->writeln(sprintf('Error: %s', $ex->getMessage()));
                 } catch (\Exception $ex) {
-                    $orders = [];
                     $this->writeln(sprintf('Error: %s', $ex->getMessage()));
+
+                    throw $ex;
                 }
             }
 
             $this->writeln("{$ordersProcessed} of {$ordersTotal} orders imported");
         }
 
-        if ($ordersProcessed) {
-            $dataFile = $this->uploadFile($this->channel, self::ORDERS_FILE_MIME_TYPE);
-
-            $this->process->setStatus(AmazonChannelProcess::STATUS_SUCCESS);
-            $this->process->setData(\json_encode([
-                    'dataFileId' => $dataFile->getId(),
-                ]
-            ));
-        } else {
-            $this->process->setStatus(AmazonChannelProcess::STATUS_EMPTY_RESPONSE);
-        }
-
-        $this->channel->setStatus(AmazonChannel::STATUS_IDLE);
-        $this->entityManager->flush();
+        return $ordersProcessed > 0;
     }
 
     private function getListOrderResult()

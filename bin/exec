@@ -4,6 +4,10 @@ COMMAND=$1
 shift
 ARGUMENTS="${@}"
 
+if [ "$PLUGINS_EXEC_COMMAND" == "" ]; then
+    PLUGINS_EXEC_COMMAND="docker-compose run --no-deps --rm php"
+fi
+
 usage() {
     echo "$0 [COMMAND] [ARGUMENTS]"
     echo "  Commands:"
@@ -32,15 +36,15 @@ up() {
 }
 
 composer() {
-    docker-compose run --no-deps --rm php composer ${@}
+    $PLUGINS_EXEC_COMMAND composer ${@}
 }
 
 console() {
-    docker-compose run --no-deps --rm php bin/console ${@}
+    $PLUGINS_EXEC_COMMAND bin/console ${@}
 }
 
 codecept() {
-    docker-compose run --no-deps --rm php vendor/bin/codecept ${@}
+    $PLUGINS_EXEC_COMMAND vendor/bin/codecept ${@}
 }
 
 tests-build() {
@@ -81,7 +85,7 @@ tests-run() {
         codecept build
     fi
 
-    docker-compose run --no-deps --rm php vendor/bin/codecept run ${@}
+    $PLUGINS_EXEC_COMMAND vendor/bin/codecept run ${@}
 }
 
 fn_exists $COMMAND

@@ -20,7 +20,7 @@ namespace App\Service\AmazonMWS\sdk\MarketplaceWebService;
 
 use App\Service\AmazonMWS\sdk\MarketplaceWebService\Model;
 
-define('MODEL_NAMESPACE', 'App\\AmazonMWS\Resources\\sdk\\MarketplaceWebService\\Model\\');
+define('MODEL_NAMESPACE', 'App\\Service\\AmazonMWS\\sdk\\MarketplaceWebService\\Model\\');
 
 /**
  * MarketplaceWebService_Model - base class for all model classes
