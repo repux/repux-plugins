@@ -61,7 +61,7 @@ class CheckAmazonCredentialsService
         $parameters = [
             'Merchant' => $channel->getMerchantId(),
             'MWSAuthToken' => $this->encryptionService->decrypt($channel->getApiToken()),
-            'ReportTypeList' => new TypeList(['Type' => ['_GET_MERCHANT_LISTINGS_DATA_']]),
+            'ReportTypeList'  => ['Type' => ['_GET_MERCHANT_LISTINGS_DATA_']],
         ];
 
         $request = new GetReportRequestListRequest($parameters);

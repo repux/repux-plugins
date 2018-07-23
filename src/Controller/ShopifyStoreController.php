@@ -65,6 +65,30 @@ class ShopifyStoreController extends FOSRestController
     }
 
     /**
+     * List ShopifyStore objects
+     *
+     * @SWG\Response(
+     *     response=Response::HTTP_OK,
+     *     description="Returns list of ShopifyStore",
+     *     @SWG\Schema(
+     *         type="object",
+     *         @SWG\Property(
+     *             property="shopify_stores",
+     *             @SWG\Items(type="object", ref=@Model(type=ShopifyStore::class))
+     *         )
+     *     )
+     * )
+     *
+     * @Rest\Get("")
+     */
+    public function getListAction()
+    {
+        $entities = $this->handler->getList();
+
+        return $this->createEntityCollectionView(ShopifyStore::class, $entities, count($entities));
+    }
+
+    /**
      * Save a ShopifyStore entity object
      *
      * @SWG\Parameter(

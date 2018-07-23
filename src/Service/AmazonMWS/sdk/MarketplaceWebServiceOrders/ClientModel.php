@@ -20,7 +20,7 @@
 
 namespace App\Service\AmazonMWS\sdk\MarketplaceWebServiceOrders;
 
-define('ORDERS_MODEL_NAMESPACE', 'App\\AmazonMWS\Resources\\sdk\\MarketplaceWebServiceOrders\\Model\\');
+define('ORDERS_MODEL_NAMESPACE', 'App\\Service\\AmazonMWS\\sdk\\MarketplaceWebServiceOrders\\Model\\');
 
 /**
  * ClientModel - base class for all model classes

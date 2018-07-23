@@ -39,6 +39,11 @@ class ShopifyStoreHandler
         $this->shopifyApiFactory = $shopifyApiFactory;
     }
 
+    public function getList()
+    {
+        return $this->repository->findAllByUser($this->currentUserService->getUser());
+    }
+
     public function findOne(string $id)
     {
         return $this->repository->findOne($this->currentUserService->getUser(), $id);

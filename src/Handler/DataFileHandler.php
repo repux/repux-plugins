@@ -39,6 +39,8 @@ class DataFileHandler
 
         $fileId = $this->fileStorage->upload($dataFile);
 
+        clearstatcache();
+
         $dataFile->setFileId($fileId);
         $dataFile->setOriginalName($dataFile->getUploadedFile()->getClientOriginalName());
         $dataFile->setFileSize($dataFile->getUploadedFile()->getSize());

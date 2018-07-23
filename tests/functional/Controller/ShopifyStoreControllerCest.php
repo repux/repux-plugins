@@ -47,6 +47,25 @@ class ShopifyStoreControllerCest
         $I->seeResponseCodeIs(Response::HTTP_NOT_FOUND);
     }
 
+    public function getList(\FunctionalTester $I)
+    {
+        /** @var User $user */
+        $user = $I->grabEntityFromRepository(User::class, ['ethAddress' => UserFixture::FIRST_USER_ADDRESS]);
+        $store = $this->haveShopifyStoreInRepository($I, $user, 'my-store');
+
+        /** @var User $user2 */
+        $user2 = $I->grabEntityFromRepository(User::class, ['ethAddress' => UserFixture::SECOND_USER_ADDRESS]);
+        $store2 = $this->haveShopifyStoreInRepository($I, $user2, 'my-store-2');
+
+        $I->sendGET(self::BASE_PATH);
+
+        $I->seeResponseCodeIs(Response::HTTP_OK);
+        $I->canSeeResponseContainsJson([
+            'meta' => ['total' => 1],
+            'shopify_stores' => [[]],
+        ]);
+    }
+
     public function postValidTwiceAndGetOne(\FunctionalTester $I)
     {
         $data = [
