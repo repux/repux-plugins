@@ -44,10 +44,9 @@ class AuthService
         try {
             $valid = EcRecover::personalVerifyEcRecover($user->getAuthMessage(), $signedMessage, $address);
         } catch (\Exception $error) {
-            throw new SignInException($error->getMessage(), 0, $error);
         }
 
-        if (!$valid) {
+        if (empty($valid)) {
             throw new SignInException('Invalid signature.');
         }
 
