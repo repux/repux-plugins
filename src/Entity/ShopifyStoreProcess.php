@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Entity\Traits\IdentityTrait;
+use App\Validator\Constraints\ShopifyStoreProcessParameters;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use JMS\Serializer\Annotation as Serializer;
@@ -46,6 +47,8 @@ class ShopifyStoreProcess
      * @ORM\Column(type="string", length=255, nullable=true)
      *
      * @Serializer\Expose
+     *
+     * @ShopifyStoreProcessParameters()
      */
     private $parameters;
 
