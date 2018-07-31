@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\AmazonMWS;
+namespace Tests\Unit\Service\AmazonMWS;
 
 use App\Entity\AmazonChannel;
 use App\Service\AmazonMWS\AmazonUrlService;

@@ -6,6 +6,7 @@ use App\DataFixtures\test\UserFixture;
 use App\Entity\AmazonChannel;
 use App\Entity\AmazonChannelProcess;
 use App\Entity\User;
+use Codeception\Example;
 use Symfony\Component\HttpFoundation\Response;
 
 class AmazonChannelProcessControllerCest
@@ -57,7 +58,7 @@ class AmazonChannelProcessControllerCest
         $data = [
             'amazon_channel_process' => [
                 'amazonChannel' => $channel->getId(),
-                'parameters' => 'some-param',
+                'parameters' => '{"created_at_from": "2016-01-01 00:00:00", "created_at_from": "2018-01-01 00:01:11"}',
                 'type' => AmazonChannelProcess::TYPE_IMPORT_ORDERS,
             ],
         ];
@@ -67,10 +68,39 @@ class AmazonChannelProcessControllerCest
         $I->seeResponseCodeIs(Response::HTTP_OK);
         $I->canSeeResponseContainsJson([
             'amazon_channel_process' => [
+                'type' => $data['amazon_channel_process']['type'],
                 'parameters' => $data['amazon_channel_process']['parameters'],
             ],
         ]);
         $I->seeInRepository(AmazonChannelProcess::class, ['parameters' => $data['amazon_channel_process']['parameters']]);
+    }
+
+    /**
+     * @example(params="{\"created_at_from\": \"not a date\", \"created_at_from\": \"2017-01-01 00:01:11\"}")
+     * @example(params="{\"invalid_param\": \"2015-01-01 00:00:00\", \"created_at_from\": \"2017-01-01 00:01:11\"}")
+     * @example(params="{\"created_at_from\": \"not a date\"}")
+     */
+    public function postAmazonChannelProcessWithInvalidParameters(\FunctionalTester $I, Example $example)
+    {
+        /** @var User $user */
+        $user = $I->grabEntityFromRepository(User::class, ['ethAddress' => UserFixture::FIRST_USER_ADDRESS]);
+        $channel = $this->haveAmazonChannelInRepository($I, $user, 'my-channel');
+
+        $data = [
+            'amazon_channel_process' => [
+                'amazonChannel' => $channel->getId(),
+                'parameters' => $example['params'],
+                'type' => AmazonChannelProcess::TYPE_IMPORT_ORDERS,
+            ],
+        ];
+
+        $I->sendPOST(self::BASE_PATH, $data);
+
+        $I->seeResponseCodeIs(Response::HTTP_BAD_REQUEST);
+        $I->dontSeeInRepository(
+            AmazonChannelProcess::class,
+            ['parameters' => $data['amazon_channel_process']['parameters']]
+        );
     }
 
     private function haveAmazonChannelInRepository(

@@ -6,6 +6,7 @@ use App\DataFixtures\test\UserFixture;
 use App\Entity\ShopifyStore;
 use App\Entity\ShopifyStoreProcess;
 use App\Entity\User;
+use Codeception\Example;
 use Symfony\Component\HttpFoundation\Response;
 
 class ShopifyStoreProcessControllerCest
@@ -57,7 +58,7 @@ class ShopifyStoreProcessControllerCest
         $data = [
             'shopify_store_process' => [
                 'shopifyStore' => $store->getId(),
-                'parameters' => 'some-param'
+                'parameters' => '{"created_at_from": "2016-01-01 00:00:00", "created_at_from": "2018-01-01 00:01:11"}',
             ],
         ];
 
@@ -70,6 +71,33 @@ class ShopifyStoreProcessControllerCest
             ],
         ]);
         $I->seeInRepository(ShopifyStoreProcess::class, ['parameters' => $data['shopify_store_process']['parameters']]);
+    }
+
+    /**
+     * @example(params="{\"created_at_from\": \"not a date\", \"created_at_from\": \"2017-01-01 00:01:11\"}")
+     * @example(params="{\"invalid_param\": \"2015-01-01 00:00:00\", \"created_at_from\": \"2017-01-01 00:01:11\"}")
+     * @example(params="{\"created_at_from\": \"not a date\"}")
+     */
+    public function postShopifyStoreProcessWithInvalidParameters(\FunctionalTester $I, Example $example)
+    {
+        /** @var User $user */
+        $user = $I->grabEntityFromRepository(User::class, ['ethAddress' => UserFixture::FIRST_USER_ADDRESS]);
+        $store = $this->haveShopifyStoreInRepository($I, $user, 'my-store');
+
+        $data = [
+            'shopify_store_process' => [
+                'shopifyStore' => $store->getId(),
+                'parameters' => $example['params'],
+            ],
+        ];
+
+        $I->sendPOST(self::BASE_PATH, $data);
+
+        $I->seeResponseCodeIs(Response::HTTP_BAD_REQUEST);
+        $I->dontSeeInRepository(
+            ShopifyStoreProcess::class,
+            ['parameters' => $data['shopify_store_process']['parameters']]
+        );
     }
 
     private function haveShopifyStoreInRepository(

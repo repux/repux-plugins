@@ -122,7 +122,7 @@ class AmazonChannelProcessImportOrdersService
         $repeatRequest = false;
         $hasOrders = false;
         $this->nextToken = null;
-        
+
         do {
             try {
                 $lastSyncAt = new \DateTime('now');
@@ -142,7 +142,7 @@ class AmazonChannelProcessImportOrdersService
             } catch (\Exception $ex) {
                 $this->writeln(sprintf('Error: %s', $ex->getMessage()));
 
-                return;
+                throw $ex;
             }
         } while ($repeatRequest);
 
@@ -204,8 +204,15 @@ class AmazonChannelProcessImportOrdersService
             'SellerId' => $this->channel->getMerchantId(),
             'MWSAuthToken' => $this->getApiToken($this->channel),
             'MarketplaceId' => $this->channel->getMarketplaceId(),
-            'CreatedAfter' => $this->getPeriodFromParameters()->format('c'),
         ];
+        $processParameters = $this->getProcessParameters();
+
+        if (!empty($processParameters['created_at_from'])) {
+            $parameters['CreatedAfter'] = $processParameters['created_at_from']->format('c');
+        }
+        if (!empty($processParameters['created_at_to'])) {
+            $parameters['CreatedBefore'] = $processParameters['created_at_to']->format('c');
+        }
 
         $request = new ListOrdersRequest($parameters);
 
@@ -319,30 +326,34 @@ class AmazonChannelProcessImportOrdersService
         return $dataFile;
     }
 
-    private function getPeriodFromParameters(): \DateTime
+    private function getProcessParameters(): array
     {
-        $parameters = \json_decode($this->process->getParameters(), true);
-        $period = $parameters['period'] ?? -1;
+        $processParameters = json_decode($this->process->getParameters(), true);
 
-        switch ($period) {
-            case AmazonChannelProcess::PARAMETER_PERIOD_LAST_MONTH:
-                $date = new \DateTime();
-                $interval = new \DateInterval('P1M');
-                $date->sub($interval);
-                break;
-            case AmazonChannelProcess::PARAMETER_PERIOD_LAST_QUARTER:
-                $date = new \DateTime();
-                $interval = new \DateInterval('P4M');
-                $date->sub($interval);
-                break;
-            case AmazonChannelProcess::PARAMETER_PERIOD_ALL:
-                $date = new \DateTime('1970-01-01 00:00:00');
-                break;
-            default:
-                $date = new \DateTime('first day of this month');
-                break;
+        if (!is_array($processParameters)) {
+            return [];
         }
 
-        return $date;
+        $processParameters['created_at_from'] = $this->getProcessDateTimeParameter(
+            $processParameters,
+            'created_at_from',
+            new \DateTime('first day of this month')
+        );
+
+        $processParameters['created_at_to'] = $this->getProcessDateTimeParameter(
+            $processParameters,
+            'created_at_to'
+        );
+
+        return $processParameters;
+    }
+
+    private function getProcessDateTimeParameter(array $parameters, string $name, \DateTime $default = null): ?\DateTime
+    {
+        if (empty($parameters[$name])) {
+            return $default;
+        }
+
+        return new \DateTime($parameters[$name]);
     }
 }

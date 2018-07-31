@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Entity\Traits\IdentityTrait;
+use App\Validator\Constraints\AmazonChannelProcessParameters;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use JMS\Serializer\Annotation as Serializer;
@@ -63,6 +64,8 @@ class AmazonChannelProcess
      * @ORM\Column(name="parameters", type="string", length=255, nullable=true)
      *
      * @Serializer\Expose
+     *
+     * @AmazonChannelProcessParameters()
      */
     private $parameters;
 

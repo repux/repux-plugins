@@ -112,8 +112,16 @@ class ShopifyStoreProcessImportOrdersService
             $query = [
                 'status' => 'closed',
                 'fields' => implode(',', $this->orderFields),
-                'created_at_min' => $this->getPeriodFromParameters()->format('c'),
             ];
+            $processParameters = $this->getProcessParameters();
+
+            if (!empty($processParameters['created_at_from'])) {
+                $query['created_at_min'] = $processParameters['created_at_from']->format('c');
+            }
+
+            if (!empty($processParameters['created_at_to'])) {
+                $query['created_at_max'] = $processParameters['created_at_to']->format('c');
+            }
 
             $api = $this->shopifyApiFactory->getForStore($store);
             $orders = $api->Order->findAll($query);
@@ -133,31 +141,35 @@ class ShopifyStoreProcessImportOrdersService
         $this->logger->info($taggedMessage);
     }
 
-    private function getPeriodFromParameters(): \DateTime
+    private function getProcessParameters(): array
     {
-        $parameters = \json_decode($this->process->getParameters(), true);
-        $period = $parameters['period'] ?? -1;
+        $processParameters = json_decode($this->process->getParameters(), true);
 
-        switch ($period) {
-            case ShopifyStoreProcess::PARAMETER_PERIOD_LAST_MONTH:
-                $date = new \DateTime();
-                $interval = new \DateInterval('P1M');
-                $date->sub($interval);
-                break;
-            case ShopifyStoreProcess::PARAMETER_PERIOD_LAST_QUARTER:
-                $date = new \DateTime();
-                $interval = new \DateInterval('P4M');
-                $date->sub($interval);
-                break;
-            case ShopifyStoreProcess::PARAMETER_PERIOD_ALL:
-                $date = new \DateTime('1970-01-01 00:00:00');
-                break;
-            default:
-                $date = new \DateTime('first day of this month');
-                break;
+        if (!is_array($processParameters)) {
+            return [];
         }
 
-        return $date;
+        $processParameters['created_at_from'] = $this->getProcessDateTimeParameter(
+            $processParameters,
+            'created_at_from',
+            new \DateTime('first day of this month')
+        );
+
+        $processParameters['created_at_to'] = $this->getProcessDateTimeParameter(
+            $processParameters,
+            'created_at_to'
+        );
+
+        return $processParameters;
+    }
+
+    private function getProcessDateTimeParameter(array $parameters, string $name, \DateTime $default = null): ?\DateTime
+    {
+        if (empty($parameters[$name])) {
+            return $default;
+        }
+
+        return new \DateTime($parameters[$name]);
     }
 
     private function processOrders(array $orders = null)
@@ -173,8 +185,9 @@ class ShopifyStoreProcessImportOrdersService
                 $ordersProcessed++;
                 unset($orders[key($orders)]);
             } catch (\Exception $ex) {
-                $orders = [];
                 $this->writeln(sprintf('Error: %s', $ex->getMessage()));
+
+                throw $ex;
             }
         }
 

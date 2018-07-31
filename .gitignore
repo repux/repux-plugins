@@ -7,3 +7,4 @@
 /.env*
 !/.env.dist
 /.docker-data
+/var/storage/*
