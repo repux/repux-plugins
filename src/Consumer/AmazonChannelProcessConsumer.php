@@ -2,8 +2,10 @@
 
 namespace App\Consumer;
 
+use App\Entity\AmazonChannel;
 use App\Entity\AmazonChannelProcess;
 use App\Service\AmazonMWS\AmazonChannelProcessImportOrdersService;
+use App\Service\AmazonMWS\AmazonChannelProcessNotifier;
 use Doctrine\ORM\EntityManager;
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
 use PhpAmqpLib\Message\AMQPMessage;
@@ -14,13 +16,16 @@ class AmazonChannelProcessConsumer implements ConsumerInterface
 
     private $processImportOrdersService;
 
+    private $notifier;
+
     public function __construct(
         EntityManager $entityManager,
-        AmazonChannelProcessImportOrdersService $processImportOrdersService
-    )
-    {
+        AmazonChannelProcessImportOrdersService $processImportOrdersService,
+        AmazonChannelProcessNotifier $notifier
+    ) {
         $this->entityManager = $entityManager;
         $this->processImportOrdersService = $processImportOrdersService;
+        $this->notifier = $notifier;
     }
 
     public function execute(AMQPMessage $msg)
@@ -31,11 +36,14 @@ class AmazonChannelProcessConsumer implements ConsumerInterface
             ->getRepository(AmazonChannelProcess::class)
             ->find($processId);
 
-        if ($process instanceof AmazonChannelProcess) {
-            // Now we only support orders import
-            if ($process->getType() === AmazonChannelProcess::TYPE_IMPORT_ORDERS) {
-                $this->processImportOrdersService->execute($process);
-            }
+        if (!$process instanceof AmazonChannelProcess
+            || $process->getType() !== AmazonChannelProcess::TYPE_IMPORT_ORDERS
+            || !$process->getAmazonChannel()->statusIs(AmazonChannel::STATUS_IDLE)
+        ) {
+            return false;
         }
+
+        $this->processImportOrdersService->execute($process);
+        $this->notifier->notify($process);
     }
 }

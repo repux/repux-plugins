@@ -1,0 +1,28 @@
+parameters:
+    guzzle.class: GuzzleHttp\Client
+    guzzle.stack.class: GuzzleHttp\HandlerStack
+    guzzle.middleware.class: GuzzleHttp\Middleware
+    guzzle.message_formatter.class: GuzzleHttp\MessageFormatter
+
+services:
+    guzzle:
+        class: "%guzzle.class%"
+        arguments:
+            - handler: '@guzzle.stack'
+
+    guzzle.stack:
+        public: false
+        class: '%guzzle.stack.class%'
+        factory: [ '%guzzle.stack.class%', create ]
+        calls:
+            - [ push, [ '@guzzle.logger' ] ]
+
+    guzzle.message_formatter:
+        public: false
+        class: '%guzzle.message_formatter.class%'
+
+    guzzle.logger:
+        public: false
+        class: callback
+        arguments: ['@logger', '@guzzle.message_formatter']
+        factory: [GuzzleHttp\Middleware, log]

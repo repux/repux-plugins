@@ -16,6 +16,7 @@ use App\Service\AmazonMWS\sdk\MarketplaceWebServiceOrders\Model\ListOrdersResult
 use App\Service\AmazonMWS\sdk\MarketplaceWebServiceOrders\Model\Order;
 use App\Entity\AmazonChannel;
 use Doctrine\ORM\EntityManager;
+use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -96,7 +97,7 @@ class AmazonChannelProcessImportOrdersService
         $this->channel = $process->getAmazonChannel();
 
         try {
-            $this->doImport($this->channel);
+            $this->doImport();
         } catch (\Exception $exception) {
             throw $exception;
         } finally {
@@ -104,18 +105,19 @@ class AmazonChannelProcessImportOrdersService
         }
     }
 
-    private function doImport(AmazonChannel $channel)
+    private function doImport()
     {
-        $channel->setStatus(AmazonChannel::STATUS_IN_PROGRESS);
-        $this->entityManager->flush();
+        $this->channel->setStatus(AmazonChannel::STATUS_IN_PROGRESS);
+        $this->process->setStatus(AmazonChannelProcess::STATUS_IN_PROGRESS);
+        $this->entityManager->flush([$this->channel, $this->process]);
 
         $this->writeln(sprintf('start: %s', $this->filepath));
 
-        $regionAbbr = AmazonChannel::getMarketplaceRegionByMarketplaceId($channel->getMarketplaceId());
+        $regionAbbr = AmazonChannel::getMarketplaceRegionByMarketplaceId($this->channel->getMarketplaceId());
 
         $this->ordersClient = $this->container->get("app_amazon_mws.client.orders.{$regionAbbr}");
         $this->ordersClient->setConfig([
-            'ServiceURL' => sprintf('%s/Orders/2013-09-01', $this->amazonUrlService->getServiceUrl($channel))
+            'ServiceURL' => sprintf('%s/Orders/2013-09-01', $this->amazonUrlService->getServiceUrl($this->channel))
         ]);
         $this->ordersClient->setOutput($this->output);
 
@@ -138,9 +140,12 @@ class AmazonChannelProcessImportOrdersService
                     $this->writeln(sprintf('Request throttled by amazon'));
                     sleep(self::THROTTLING_SLEEP_SECONDS);
                 }
-                $this->writeln(sprintf('Error: %s', $ex->getMessage()));
+                $this->writeln(sprintf('Error: %s', $ex->getMessage()), Logger::ERROR);
             } catch (\Exception $ex) {
-                $this->writeln(sprintf('Error: %s', $ex->getMessage()));
+                $this->writeln(sprintf('Error: %s', $ex->getMessage()), Logger::ERROR);
+
+                $this->process->setStatus(AmazonChannelProcess::STATUS_ERROR);
+                $this->entityManager->flush($this->process);
 
                 throw $ex;
             }
@@ -150,16 +155,13 @@ class AmazonChannelProcessImportOrdersService
             $dataFile = $this->uploadFile($this->channel, self::ORDERS_FILE_MIME_TYPE);
 
             $this->process->setStatus(AmazonChannelProcess::STATUS_SUCCESS);
-            $this->process->setData(\json_encode([
-                    'dataFileId' => $dataFile->getId(),
-                ]
-            ));
+            $this->process->setDataFile($dataFile);
         } else {
             $this->process->setStatus(AmazonChannelProcess::STATUS_EMPTY_RESPONSE);
         }
 
         $this->channel->setStatus(AmazonChannel::STATUS_IDLE);
-        $this->entityManager->flush();
+        $this->entityManager->flush([$this->channel, $this->process]);
     }
 
     private function processOrders(): bool
@@ -186,7 +188,7 @@ class AmazonChannelProcessImportOrdersService
                     $ordersProcessed++;
                     unset($orders[key($orders)]);
                 } catch (\Exception $ex) {
-                    $this->writeln(sprintf('Error: %s', $ex->getMessage()));
+                    $this->writeln(sprintf('Error: %s', $ex->getMessage()), Logger::ERROR);
 
                     throw $ex;
                 }
@@ -298,11 +300,11 @@ class AmazonChannelProcessImportOrdersService
         $this->output = $output;
     }
 
-    private function writeln(string $message)
+    private function writeln(string $message, int $level = Logger::INFO)
     {
         $taggedMessage = sprintf('[amazon][process]:%s %s', $this->process->getId(), $message);
         $this->output->writeln($taggedMessage);
-        $this->logger->info($taggedMessage);
+        $this->logger->log($level, $taggedMessage);
     }
 
     protected function getApiToken(AmazonChannel $channel): string
@@ -331,7 +333,7 @@ class AmazonChannelProcessImportOrdersService
         $processParameters = json_decode($this->process->getParameters(), true);
 
         if (!is_array($processParameters)) {
-            return [];
+            $processParameters = [];
         }
 
         $processParameters['created_at_from'] = $this->getProcessDateTimeParameter(

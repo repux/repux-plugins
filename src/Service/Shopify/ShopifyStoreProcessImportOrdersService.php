@@ -96,7 +96,7 @@ class ShopifyStoreProcessImportOrdersService
         $this->store = $process->getShopifyStore();
 
         try {
-            $this->doImport($this->store);
+            $this->doImport();
         } catch (\Exception $exception) {
             throw $exception;
         } finally {
@@ -104,8 +104,11 @@ class ShopifyStoreProcessImportOrdersService
         }
     }
 
-    private function doImport(ShopifyStore $store)
+    private function doImport()
     {
+        $this->process->setStatus(ShopifyStoreProcess::STATUS_IN_PROGRESS);
+        $this->entityManager->flush($this->process);
+
         $this->writeln(sprintf('start: %s', $this->filepath));
 
         try {
@@ -123,12 +126,15 @@ class ShopifyStoreProcessImportOrdersService
                 $query['created_at_max'] = $processParameters['created_at_to']->format('c');
             }
 
-            $api = $this->shopifyApiFactory->getForStore($store);
+            $api = $this->shopifyApiFactory->getForStore($this->store);
             $orders = $api->Order->findAll($query);
 
             $this->processOrders($orders);
         } catch (\Exception $exception) {
             $this->writeln(sprintf('Error: %s', $exception->getMessage()));
+
+            $this->process->setStatus(ShopifyStoreProcess::STATUS_ERROR);
+            $this->entityManager->flush($this->process);
 
             throw $exception;
         }
@@ -146,7 +152,7 @@ class ShopifyStoreProcessImportOrdersService
         $processParameters = json_decode($this->process->getParameters(), true);
 
         if (!is_array($processParameters)) {
-            return [];
+            $processParameters = [];
         }
 
         $processParameters['created_at_from'] = $this->getProcessDateTimeParameter(
@@ -197,7 +203,7 @@ class ShopifyStoreProcessImportOrdersService
             $dataFile = $this->uploadFile($this->store, self::ORDERS_FILE_MIME_TYPE);
 
             $this->process->setStatus(ShopifyStoreProcess::STATUS_SUCCESS);
-            $this->process->setData(\json_encode(['dataFileId' => $dataFile->getId()]));
+            $this->process->setDataFile($dataFile);
         } else {
             $this->process->setStatus(ShopifyStoreProcess::STATUS_EMPTY_RESPONSE);
         }

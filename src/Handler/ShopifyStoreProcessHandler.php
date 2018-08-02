@@ -44,8 +44,6 @@ class ShopifyStoreProcessHandler
 
     public function create(ShopifyStoreProcess $shopifyStoreProcess): ShopifyStoreProcess
     {
-        $shopifyStoreProcess->setStatus(ShopifyStoreProcess::STATUS_IN_PROGRESS);
-
         $this->entityManager->persist($shopifyStoreProcess);
         $this->entityManager->flush();
 

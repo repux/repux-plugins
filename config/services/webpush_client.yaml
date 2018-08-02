@@ -1,0 +1,22 @@
+parameters:
+    env(PLUGINS_WEBPUSH_GATEWAY_URL): 'https://172.18.0.12:3000/gateway'
+    env(PLUGINS_WEBPUSH_GATEWAY_USER): 'repux'
+    env(PLUGINS_WEBPUSH_GATEWAY_PASSWORD): 'password'
+
+services:
+    webpush.middleware.auth:
+        class: callback
+        arguments: ['%env(PLUGINS_WEBPUSH_GATEWAY_USER)%', '%env(PLUGINS_WEBPUSH_GATEWAY_PASSWORD)%']
+        factory: [App\Security\WebpushMiddleware, auth]
+
+    webpush.gateway_client.stack:
+        parent: guzzle.stack
+        calls:
+            - [ push, [ '@webpush.middleware.auth', 'basic_auth' ] ]
+
+    webpush.gateway_client:
+        parent: guzzle
+        arguments:
+            index_0:
+                handler: '@webpush.gateway_client.stack'
+                base_uri: '%env(PLUGINS_WEBPUSH_GATEWAY_URL)%'

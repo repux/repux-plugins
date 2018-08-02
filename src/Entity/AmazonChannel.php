@@ -177,11 +177,11 @@ class AmazonChannel implements UserRelatedInterface
     /**
      * @var integer
      *
-     * @ORM\Column(type="integer", nullable=true, options={"default":0})
+     * @ORM\Column(type="integer", nullable=true, options={"default": AmazonChannel::STATUS_IDLE})
      *
      * @Serializer\Expose
      */
-    private $status;
+    private $status = self::STATUS_IDLE;
 
     /**
      * @var string
@@ -363,5 +363,10 @@ class AmazonChannel implements UserRelatedInterface
     public function setStatus(int $status)
     {
         $this->status = $status;
+    }
+
+    public function statusIs(int $status): bool
+    {
+        return $this->status === $status;
     }
 }

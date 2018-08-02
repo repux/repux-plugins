@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\ShopifyStoreProcess;
+use App\Service\Shopify\ShopifyStoreProcessNotifier;
 use App\Service\Shopify\ShopifyStoreProcessImportOrdersService;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -38,6 +39,8 @@ class ShopifyOrdersImportCommand extends ContainerAwareCommand
 
             $processImportOrdersService->setOutput($output);
             $processImportOrdersService->execute($process);
+
+            $this->getContainer()->get(ShopifyStoreProcessNotifier::class)->notify($process);
 
             return;
         }

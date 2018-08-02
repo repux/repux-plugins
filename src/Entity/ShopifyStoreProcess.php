@@ -55,20 +55,21 @@ class ShopifyStoreProcess
     /**
      * @var integer
      *
-     * @ORM\Column(type="integer", options={"default":0})
+     * @ORM\Column(type="integer", options={"default": ShopifyStoreProcess::STATUS_IDLE})
      *
      * @Serializer\Expose
      */
-    private $status;
+    private $status = self::STATUS_IDLE;
 
     /**
-     * @var string
+     * @var DataFile
      *
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\OneToOne(targetEntity="DataFile")
+     * @ORM\JoinColumn(nullable=true)
      *
      * @Serializer\Expose
      */
-    private $data;
+    private $dataFile;
 
     protected $createdAt;
 
@@ -97,18 +98,23 @@ class ShopifyStoreProcess
         return $this->status;
     }
 
+    public function statusIs(int $status): bool
+    {
+        return $this->status === $status;
+    }
+
     public function setStatus(int $status)
     {
         $this->status = $status;
     }
 
-    public function getData(): ?string
+    public function getDataFile(): ?DataFile
     {
-        return $this->data;
+        return $this->dataFile;
     }
 
-    public function setData(?string $data)
+    public function setDataFile(DataFile $dataFile): void
     {
-        $this->data = $data;
+        $this->dataFile = $dataFile;
     }
 }
