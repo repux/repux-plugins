@@ -72,20 +72,21 @@ class AmazonChannelProcess
     /**
      * @var integer
      *
-     * @ORM\Column(name="status", type="integer", options={"default":0})
+     * @ORM\Column(name="status", type="integer", options={"default": AmazonChannelProcess::STATUS_IDLE})
      *
      * @Serializer\Expose
      */
-    private $status;
+    private $status = self::STATUS_IDLE;
 
     /**
-     * @var string
+     * @var DataFile
      *
-     * @ORM\Column(name="data", type="string", length=255, nullable=true)
+     * @ORM\OneToOne(targetEntity="DataFile", inversedBy="amazonChannelProcess")
+     * @ORM\JoinColumn(nullable=true)
      *
      * @Serializer\Expose
      */
-    private $data;
+    private $dataFile;
 
     /**
      * @Serializer\Expose
@@ -132,13 +133,18 @@ class AmazonChannelProcess
         $this->status = $status;
     }
 
-    public function getData()
+    public function statusIs(int $status): bool
     {
-        return $this->data;
+        return $this->status === $status;
     }
 
-    public function setData(string $data)
+    public function getDataFile(): ?DataFile
     {
-        $this->data = $data;
+        return $this->dataFile;
+    }
+
+    public function setDataFile(DataFile $dataFile): void
+    {
+        $this->dataFile = $dataFile;
     }
 }

@@ -41,8 +41,6 @@ class AmazonChannelProcessHandler
 
     public function create(AmazonChannelProcess $channelAmazonProcess): AmazonChannelProcess
     {
-        $channelAmazonProcess->setStatus(AmazonChannelProcess::STATUS_IN_PROGRESS);
-
         $this->entityManager->persist($channelAmazonProcess);
         $this->entityManager->flush();
 

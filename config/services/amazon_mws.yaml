@@ -165,3 +165,13 @@ services:
     App\Service\AmazonMWS\AmazonUrlService:
         arguments:
             $fixedUrl: '%amazon.service_url%'
+
+    App\Service\AmazonMWS\AmazonChannelProcessNotifier:
+        public: true
+        arguments:
+            $config:
+                title: '%env(PLUGINS_WEBPUSH_FILE_TITLE)%'
+                messages:
+                    !php/const:App\Entity\AmazonChannelProcess::STATUS_SUCCESS: '%env(PLUGINS_WEBPUSH_FILE_READY_MESSAGE)%'
+                    !php/const:App\Entity\AmazonChannelProcess::STATUS_EMPTY_RESPONSE: '%env(PLUGINS_WEBPUSH_FILE_EMPTY_MESSAGE)%'
+                    !php/const:App\Entity\AmazonChannelProcess::STATUS_ERROR: '%env(PLUGINS_WEBPUSH_FILE_ERROR_MESSAGE)%'

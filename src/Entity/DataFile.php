@@ -7,11 +7,14 @@ use App\Entity\Traits\IdentityTrait;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Blameable\Traits\BlameableEntity;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
+use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\DataFileRepository")
+ *
+ * @Serializer\ExclusionPolicy("all")
  */
 class DataFile implements UserRelatedInterface
 {
@@ -32,6 +35,8 @@ class DataFile implements UserRelatedInterface
      * @var int|null
      *
      * @ORM\Column(type="integer")
+     *
+     * @Serializer\Expose
      */
     private $fileSize = 0;
 
@@ -49,6 +54,8 @@ class DataFile implements UserRelatedInterface
      * @var string|null
      *
      * @ORM\Column(type="string", length=255, nullable=true)
+     *
+     * @Serializer\Expose
      */
     private $fileMimeType;
 
@@ -56,6 +63,8 @@ class DataFile implements UserRelatedInterface
      * @var string|null
      *
      * @ORM\Column(type="string", length=50, nullable=false)
+     *
+     * @Serializer\Expose
      */
     private $origin;
 
@@ -63,6 +72,8 @@ class DataFile implements UserRelatedInterface
      * @var string|null
      *
      * @ORM\Column(type="string", length=250, nullable=false)
+     *
+     * @Serializer\Expose
      */
     private $originalName;
 
@@ -73,6 +84,24 @@ class DataFile implements UserRelatedInterface
      * @Assert\File(maxSize="10M", groups={"create"})
      */
     private $uploadedFile;
+
+    /**
+     * @var AmazonChannelProcess
+     *
+     * @ORM\OneToOne(targetEntity="AmazonChannelProcess", mappedBy="dataFile")
+     *
+     * @Serializer\Expose
+     */
+    private $amazonChannelProcess;
+
+    /**
+     * @var ShopifyStoreProcess
+     *
+     * @ORM\OneToOne(targetEntity="ShopifyStoreProcess", mappedBy="dataFile")
+     *
+     * @Serializer\Expose
+     */
+    private $shopifyStoreProcess;
 
     public function getUser(): ?User
     {
@@ -142,5 +171,28 @@ class DataFile implements UserRelatedInterface
     public function setOriginalName(string $originalName): void
     {
         $this->originalName = $originalName;
+    }
+
+    public function getAmazonChannelProcess(): ?AmazonChannelProcess
+    {
+        return $this->amazonChannelProcess;
+    }
+
+    /**
+     * @param AmazonChannelProcess $amazonChannelProcess
+     */
+    public function setAmazonChannelProcess(AmazonChannelProcess $amazonChannelProcess): void
+    {
+        $this->amazonChannelProcess = $amazonChannelProcess;
+    }
+
+    public function getShopifyStoreProcess(): ?ShopifyStoreProcess
+    {
+        return $this->shopifyStoreProcess;
+    }
+
+    public function setShopifyStoreProcess(ShopifyStoreProcess $shopifyStoreProcess): void
+    {
+        $this->shopifyStoreProcess = $shopifyStoreProcess;
     }
 }

@@ -29,14 +29,11 @@ services:
         arguments:
             $logger: '@logger'
 
-    guzzle.client.shopify_api:
-        class: GuzzleHttp\Client
-
     App\Shopify\Authentication\OAuth:
         public: true
         arguments:
             $config: '%shopify.oauth%'
-            $client: '@guzzle.client.shopify_api'
+            $client: '@guzzle'
 
 
     App\Security\HmacSignature:
@@ -45,3 +42,13 @@ services:
 
     App\Consumer\ShopifyStoreProcessConsumer:
         public: true
+
+    App\Service\Shopify\ShopifyStoreProcessNotifier:
+        public: true
+        arguments:
+            $config:
+                title: '%env(PLUGINS_WEBPUSH_FILE_TITLE)%'
+                messages:
+                    !php/const:App\Entity\ShopifyStoreProcess::STATUS_SUCCESS: '%env(PLUGINS_WEBPUSH_FILE_READY_MESSAGE)%'
+                    !php/const:App\Entity\ShopifyStoreProcess::STATUS_EMPTY_RESPONSE: '%env(PLUGINS_WEBPUSH_FILE_EMPTY_MESSAGE)%'
+                    !php/const:App\Entity\ShopifyStoreProcess::STATUS_ERROR: '%env(PLUGINS_WEBPUSH_FILE_ERROR_MESSAGE)%'
